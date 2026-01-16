@@ -1,0 +1,10 @@
+/* Week 05 - CSS3, Flexbox, Responsive Design */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #f4f6f8; }
+header { background: #2c3e50; color: #fff; padding: 1rem 2rem; }
+main { max-width: 900px; margin: 2rem auto; padding: 1rem; }
+table { width: 100%; border-collapse: collapse; background: #fff;
+        border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+th { background: #2c3e50; color: #fff; padding: .8rem 1rem; text-align: left; }
+td { padding: .8rem 1rem; border-bottom: 1px solid #eee; }
+@media (max-width: 600px) { table, thead, tbody, th, td, tr { display: block; } }
