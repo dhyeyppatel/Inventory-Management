@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Successful - Stockify</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{% static 'css/register_success.css' %}">
+</head>
+<body>
+    <div class="success-card">
+        <div class="card-banner">
+            <div class="icon-wrapper"><i class="fa-solid fa-circle-check"></i></div>
+        </div>
+        <div class="card-body">
+            <h1>Registration Successful!</h1>
+            <p>Your Stockify account has been successfully created. You can now access your dashboard to start tracking inventory and managing orders.</p>
+            <a href="{% url 'login' %}" class="btn-login"><i class="fa-solid fa-arrow-right-to-bracket"></i> Log In Now</a>
+            <a href="{% url 'landing_page' %}" class="return-home">Return to Home</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,176 @@
+/* Core Setup & Viewport Constraint */
+body {
+    margin: 0;
+    padding: 0;
+    /* Reverted to system fonts to perfectly match your login page */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f4f6f8; 
+    height: 100vh; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; 
+    position: relative;
+    color: #212529; /* Standard dark text */
+}
+
+/* Need Help Button (Matched to Login Page colors) */
+.btn-help {
+    position: absolute;
+    top: 22px;
+    right: 28px;
+    background: white;
+    color: #4b5563; /* Gray text */
+    text-decoration: none;
+    padding: 6px 13px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.btn-help i {
+    color: #6c757d; /* Changed from blue to gray to match login */
+    font-size: 15px;
+}
+
+/* Layout Container */
+.container {
+    width: 100%;
+    max-width: 370px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+/* Header & Logo Image Setup */
+.header {
+    text-align: center;
+    margin-bottom: 16px; 
+}
+
+.logo-img {
+    width: 40px; 
+    height: auto;
+    margin-bottom: 8px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.header h1 {
+    margin: 0 0 6px 0;
+    font-size: 24px; /* Matched to login page */
+    font-weight: 700;
+    color: #111827; 
+}
+
+.header p {
+    margin: 0;
+    font-size: 14px; /* Matched to login page */
+    color: #6b7280; 
+}
+
+/* The White Card */
+.card {
+    background: white;
+    width: 100%;
+    padding: 22px 28px; 
+    border-radius: 8px; /* Slightly sharper corners matching login */
+    border: 1px solid #f3f4f6; 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 12px; 
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px; /* Brought size back up */
+    font-weight: 600; /* Bolder, matching login */
+    color: #212529; /* Darker text matching login */
+    margin-bottom: 5px; 
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper i {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #adb5bd; 
+    font-size: 13px;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 9px 12px 9px 36px; /* Slightly taller inputs */
+    border: 1px solid #ced4da; /* Matched login border color */
+    border-radius: 6px; 
+    font-size: 14px; /* Larger input text matching login */
+    color: #212529;
+    box-sizing: border-box;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.input-wrapper input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input-wrapper input::placeholder {
+    color: #adb5bd; /* Matched login placeholder color */
+}
+
+/* Submit Button */
+.btn-submit {
+    width: 100%;
+    background-color: #2563eb; 
+    color: white;
+    border: none;
+    padding: 10px; 
+    margin-top: 6px; 
+    border-radius: 6px;
+    font-size: 15px; /* Larger, matching "Sign In" */
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-submit:hover {
+    background-color: #1d4ed8;
+}
+
+/* Footer Link */
+.card-footer {
+    text-align: center;
+    margin-top: 15px; 
+}
+
+.card-footer p {
+    margin: 0;
+    font-size: 13px; /* Matched login */
+    color: #6b7280;
+}
+
+.card-footer a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.card-footer a:hover {
+    text-decoration: underline;
+}
