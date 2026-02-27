@@ -1,0 +1,130 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stockify</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+</head>
+
+<body>
+
+    <div class="navbar">
+        <div class="logo">
+            <img src="{% static 'images/cube-logo.png' %}" alt="Logo">
+            Stockify
+        </div>
+        <a class="login-btn" href="{% url 'login' %}">Login</a>
+    </div>
+
+    <section class="hero">
+        <div class="hero-text">
+            <h1>
+                Master Your Inventory,
+                <span class="gradient">Optimize Your Growth</span>
+            </h1>
+            <p>
+                The all-in-one platform for modern businesses to track stock, manage orders, 
+                and forecast demand with enterprise-grade precision.
+            </p>
+        </div>
+
+        <div class="dashboard">
+            <div class="cards">
+                <div class="small-card"></div>
+                <div class="small-card"></div>
+                <div class="small-card"></div>
+            </div>
+            <div class="chart"></div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <h2>
+            Powerful Features for
+            <span class="highlight">Modern Inventory Management</span>
+        </h2>
+
+        <p>
+            Everything you need to manage your inventory efficiently in one place, 
+            built for scale and speed.
+        </p>
+
+        <div class="feature-grid">
+
+            <div class="feature-card">
+                <div class="icon blue">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+                <h4>Sale & Purchase</h4>
+                <p>
+                    Control your entire supply chain by tracking every vendor transaction 
+                    and client order centrally.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon green">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <h4>Real-time Tracking</h4>
+                <p>
+                    Eliminate stockouts and overstocking with precision monitoring 
+                    of global inventory levels.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon purple">
+                    <i class="fa-solid fa-barcode"></i>
+                </div>
+                <h4>Barcode Support</h4>
+                <p>
+                    Maximize operational efficiency by integrating high-speed 
+                    barcode scanning.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon orange">
+                    <i class="fa-solid fa-chart-column"></i>
+                </div>
+                <h4>Smart Analytics</h4>
+                <p>
+                    Unlock powerful business intelligence through comprehensive analytics.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="cta">
+        <h2>Ready to optimize your inventory?</h2>
+        <p>Join the platform that is powering the next generation of supply chains.</p>
+        <a href="{% url 'contact' %}" class="cta-btn">Talk to Sales</a>
+    </section>
+
+    {% include 'inventory/footer.html' %}
+
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+
+        window.addEventListener('pageshow', function () {
+            if (!window.location.hash) {
+                window.scrollTo(0, 0);
+            }
+        });
+    </script>
+
+</body>
+</html>
