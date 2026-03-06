@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Careers - Stockify</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{% static 'css/careers.css' %}">
+</head>
+<body>
+
+    <nav class="app-nav">
+        <a href="{% url 'landing_page' %}" class="logo">
+            <img src="{% static 'images/cube-logo.png' %}" alt="Logo"> Stockify
+        </a>
+        <div class="nav-links">
+            <a href="{% url 'login' %}" class="btn-primary">Login</a>
+        </div>
+    </nav>
+
+    <div class="careers-container">
+        <div class="careers-header">
+            <h1>Build the future of <span>supply chain.</span></h1>
+            <p>Join our fast-growing team and help businesses around the world optimize their inventory and scale their operations.</p>
+        </div>
+
+        <div class="perks-grid">
+            <div class="perk-item">
+                <i class="fa-solid fa-house-laptop"></i>
+                <h4>Flexible Work</h4>
+                <p>Work from our modern office in Surat, or from the comfort of your home.</p>
+            </div>
+            <div class="perk-item">
+                <i class="fa-solid fa-rocket"></i>
+                <h4>Growth & Learning</h4>
+                <p>Access to premium courses, books, and regular tech-talks to boost your skills.</p>
+            </div>
+            <div class="perk-item">
+                <i class="fa-solid fa-mug-hot"></i>
+                <h4>Great Culture</h4>
+                <p>A collaborative environment built on trust, innovation, and great coffee.</p>
+            </div>
+        </div>
+
+        <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 25px;">Open Positions</h2>
+        
+        <div class="job-list">
+            <div class="job-card">
+                <div class="job-info">
+                    <h3>Full-Stack Python Developer</h3>
+                    <div class="job-meta">
+                        <span><i class="fa-solid fa-location-dot"></i> Surat, Gujarat / Remote</span>
+                        <span><i class="fa-solid fa-clock"></i> Full-Time</span>
+                    </div>
+                </div>
+                <a href="{% url 'contact' %}" class="apply-btn">Apply Now</a>
+            </div>
+
+            <div class="job-card">
+                <div class="job-info">
+                    <h3>Frontend UI/UX Engineer</h3>
+                    <div class="job-meta">
+                        <span><i class="fa-solid fa-location-dot"></i> Remote</span>
+                        <span><i class="fa-solid fa-clock"></i> Full-Time</span>
+                    </div>
+                </div>
+                <a href="{% url 'contact' %}" class="apply-btn">Apply Now</a>
+            </div>
+
+            <div class="job-card">
+                <div class="job-info">
+                    <h3>Product Support Specialist</h3>
+                    <div class="job-meta">
+                        <span><i class="fa-solid fa-location-dot"></i> Surat, Gujarat</span>
+                        <span><i class="fa-solid fa-clock"></i> Part-Time</span>
+                    </div>
+                </div>
+                <a href="{% url 'contact' %}" class="apply-btn">Apply Now</a>
+            </div>
+        </div>
+    </div>
+
+    {% include 'inventory/footer.html' %}
+
+</body>
+</html>

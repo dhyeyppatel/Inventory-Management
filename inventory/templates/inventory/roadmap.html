@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Roadmap - Stockify</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{% static 'css/roadmap.css' %}">
+</head>
+<body>
+
+    <nav class="app-nav">
+        <a href="{% url 'landing_page' %}" class="logo">
+            <img src="{% static 'images/cube-logo.png' %}" alt="Logo"> Stockify
+        </a>
+        <div class="nav-links">
+            <a href="{% url 'login' %}" class="btn-primary">Login</a>
+        </div>
+    </nav>
+
+    <div class="roadmap-container">
+        <div class="roadmap-header">
+            <h1>Product Roadmap</h1>
+            <p>See what we've shipped, what we're actively building, and what's coming next to make Stockify the best inventory platform.</p>
+        </div>
+
+        <div class="roadmap-grid">
+            
+            <div class="board-column">
+                <div class="column-header col-done">
+                    <i class="fa-solid fa-circle-check"></i> Recently Shipped
+                </div>
+                
+                <div class="task-card">
+                    <h3>Secure Authentication</h3>
+                    <p>Complete user registration, secure login, and encrypted password reset flows.</p>
+                    <span class="tag tag-core">Core System</span>
+                </div>
+
+                <div class="task-card">
+                    <h3>Warehouse Dashboard</h3>
+                    <p>Real-time overview of total stock value, low stock alerts, and high-velocity items.</p>
+                    <span class="tag tag-feature">Feature</span>
+                </div>
+            </div>
+
+            <div class="board-column">
+                <div class="column-header col-progress">
+                    <i class="fa-solid fa-spinner fa-spin"></i> In Progress
+                </div>
+                
+                <div class="task-card" style="border-left: 3px solid #2563eb;">
+                    <h3>Admin Console Data Entry</h3>
+                    <p>Building the secure forms required to add new inventory, update SKUs, and manage categories.</p>
+                    <span class="tag tag-core">Core System</span>
+                </div>
+
+                <div class="task-card">
+                    <h3>User Profile Management</h3>
+                    <p>Allowing users to dynamically update their business details and warehouse locations.</p>
+                    <span class="tag tag-ux">UX Improvement</span>
+                </div>
+            </div>
+
+            <div class="board-column">
+                <div class="column-header col-planned">
+                    <i class="fa-regular fa-calendar-days"></i> Up Next
+                </div>
+                
+                <div class="task-card">
+                    <h3>Barcode Scanning</h3>
+                    <p>Native support for mobile barcode scanning to instantly log incoming and outgoing stock.</p>
+                    <span class="tag tag-feature">Feature</span>
+                </div>
+
+                <div class="task-card">
+                    <h3>PDF Report Exports</h3>
+                    <p>One-click PDF generation for end-of-month inventory audits and tax reporting.</p>
+                    <span class="tag tag-feature">Feature</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% include 'inventory/footer.html' %}
+
+</body>
+</html>
