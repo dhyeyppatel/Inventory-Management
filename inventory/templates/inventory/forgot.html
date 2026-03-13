@@ -1,0 +1,49 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stockify - Forgot Password</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link rel="stylesheet" href="{% static 'css/forgot.css' %}">
+</head>
+<body>
+
+<a href="{% url 'contact' %}" class="help-btn">Need Help <i class="fa-solid fa-circle-question"></i></a>
+
+<div class="brand-header">
+<img src="{% static 'images/cube-logo.png' %}" alt="Stockify Logo">
+<h1>Stockify</h1>
+</div>
+
+<div class="forgot-card">
+<h2>Forgot Your Password?</h2>
+<p>Enter your email address and we'll send you a link to reset your password.</p>
+
+<form action="{% url 'forgot_password' %}" method="POST">
+{% csrf_token %}
+<div class="input-group">
+<label>Email Address</label>
+<div class="input-wrapper">
+<i class="fa-solid fa-envelope"></i>
+<input type="email" name="email" placeholder="name@company.com" required>
+</div>
+</div>
+
+<button type="submit" class="submit-btn">Send Reset Link</button>
+
+</form>
+
+<div class="back-link">
+<a href="{% url 'login' %}"><i class="fa-solid fa-arrow-left"></i> Back to Login</a>
+</div>
+</div>
+
+</body>
+</html>

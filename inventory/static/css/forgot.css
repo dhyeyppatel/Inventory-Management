@@ -1,0 +1,169 @@
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: 'Inter', sans-serif;
+}
+
+body {
+background: #f8fafc;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+min-height: 100vh;
+position: relative;
+color: #0f172a;
+}
+
+.help-btn {
+position: absolute;
+top: 30px;
+right: 40px;
+border: 1px solid #cbd5e1;
+background: white;
+padding: 8px 16px;
+border-radius: 20px;
+font-size: 14px;
+color: #475569;
+text-decoration: none;
+display: flex;
+align-items: center;
+gap: 8px;
+font-weight: 600;
+transition: 0.3s;
+}
+
+.help-btn i {
+color: #64748b;
+font-size: 16px;
+}
+
+.help-btn:hover {
+border-color: #94a3b8;
+color: #0f172a;
+}
+
+.brand-header {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 30px;
+}
+
+.brand-header img {
+width: 36px;
+height: 36px;
+object-fit: contain;
+}
+
+.brand-header h1 {
+font-size: 26px;
+font-weight: 800;
+color: #0f172a;
+}
+
+.forgot-card {
+background: white;
+padding: 40px;
+border-radius: 12px;
+box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+border: 1px solid #f1f5f9;
+width: 100%;
+max-width: 440px;
+text-align: center;
+}
+
+.forgot-card h2 {
+font-size: 26px;
+font-weight: 800;
+margin-bottom: 12px;
+color: #0f172a;
+}
+
+.forgot-card p {
+font-size: 15px;
+color: #475569;
+margin-bottom: 30px;
+line-height: 1.5;
+padding: 0 10px;
+}
+
+.input-group {
+margin-bottom: 25px;
+text-align: left;
+}
+
+.input-group label {
+display: block;
+font-size: 14px;
+font-weight: 600;
+color: #1e293b;
+margin-bottom: 8px;
+}
+
+.input-wrapper {
+position: relative;
+}
+
+.input-wrapper i {
+position: absolute;
+left: 14px;
+top: 50%;
+transform: translateY(-50%);
+color: #64748b;
+font-size: 14px;
+}
+
+.input-wrapper input {
+width: 100%;
+padding: 12px 12px 12px 40px;
+border: 1px solid #e2e8f0;
+border-radius: 8px;
+font-size: 14px;
+outline: none;
+color: #0f172a;
+transition: 0.3s;
+}
+
+.input-wrapper input:focus {
+border-color: #2563eb;
+box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+.submit-btn {
+width: 100%;
+background: #2563eb;
+color: white;
+border: none;
+padding: 14px;
+border-radius: 8px;
+font-size: 16px;
+font-weight: 600;
+cursor: pointer;
+transition: 0.3s;
+margin-bottom: 25px;
+}
+
+.submit-btn:hover {
+background: #1d4ed8;
+}
+
+.back-link a {
+color: #475569;
+text-decoration: none;
+font-weight: 600;
+font-size: 14px;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+transition: 0.3s;
+}
+
+.back-link a i {
+font-size: 12px;
+}
+
+.back-link a:hover {
+color: #2563eb;
+}
