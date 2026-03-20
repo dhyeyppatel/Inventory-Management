@@ -1,0 +1,343 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stockify - Warehouse Overview</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/warehouse.css' %}">
+</head>
+<body>
+
+<nav class="app-nav">
+    <div class="nav-left">
+        <a href="#" class="logo"><img src="{% static 'images/cube-logo.png' %}" alt="Logo"> Stockify</a>
+        
+        <div class="location-dropdown" id="locationDropdownBtn">
+            <i class="fa-solid fa-circle"></i> 
+            
+            {% if current_warehouse %}
+                {{ current_warehouse.name }} <span style="color: #64748b; font-weight: 500; margin-left: 2px;">({{ current_warehouse.location }})</span>
+            {% else %}
+                No Locations Added
+            {% endif %}
+            
+            <i class="fa-solid fa-chevron-down" style="margin-left: 4px;"></i>
+            
+            <div class="profile-dropdown-menu location-menu" id="locationDropdown">
+                <div class="dropdown-header">
+                    <strong>Your Locations</strong>
+                    <span>Select to switch inventory view</span>
+                </div>
+                <hr>
+                {% for wh in warehouses %}
+                    <a href="?warehouse_id={{ wh.id }}{% if search_query %}&search={{ search_query }}{% endif %}" class="{% if current_warehouse and current_warehouse.id == wh.id %}active-location{% endif %}">
+                        <i class="fa-solid fa-warehouse"></i> {{ wh.name }} <span style="font-size: 12px; opacity: 0.7; margin-left: 4px;">({{ wh.location }})</span>
+                    </a>
+                {% empty %}
+                    <span class="empty-location">No locations added.</span>
+                {% endfor %}
+                <hr>
+                <a href="{% url 'manage_warehouses' %}" class="manage-wh-link"><i class="fa-solid fa-plus"></i> Add Locations</a>
+            </div>
+        </div>
+    </div>
+
+    <form method="GET" action="{% url 'warehouse_overview' %}" id="navSearchForm" style="margin: 0; display: flex; align-items: center; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 16px; width: 450px;">
+        {% if request.GET.warehouse_id %}
+            <input type="hidden" name="warehouse_id" value="{{ request.GET.warehouse_id }}">
+        {% endif %}
+        <button type="submit" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; color: #94a3b8; outline: none; display: flex; align-items: center;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+        <input type="text" name="search" value="{{ search_query }}" placeholder="Search SKU, Batch ID, or Product Name..." style="flex: 1; border: none; background: transparent; outline: none; font-family: 'Inter', sans-serif; font-size: 13px; color: #0f172a; margin-left: 10px; width: 100%;">
+    </form>
+
+    <div class="nav-right">
+        <a href="{% url 'admin_console' %}" class="admin-btn admin-btn-link"><i class="fa-solid fa-shield-halved"></i> Admin Console</a>
+        
+        <a href="{% url 'notifications' %}" class="nav-icon-link">
+            <i class="fa-regular fa-bell nav-icons"></i>
+        </a>
+        
+        <div class="user-profile" id="profileDropdownBtn">
+            <div class="avatar">{{ user.username|make_list|first|upper }}</div> 
+            {{ user.username }} <i class="fa-solid fa-chevron-down"></i>
+            
+            <div class="profile-dropdown-menu" id="profileDropdown">
+                <div class="dropdown-header">
+                    <strong>{{ user.username }}</strong>
+                    <span>{{ user.email }}</span>
+                </div>
+                <hr>
+                <a href="{% url 'edit_profile' %}"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
+                <a href="{% url 'manage_warehouses' %}"><i class="fa-solid fa-warehouse"></i> Manage Warehouses</a>
+                <a href="{% url 'logout' %}" class="text-red"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="dashboard-container">
+    <div class="page-header">
+        <h1>Warehouse Overview</h1>
+        <div class="last-updated">Updated: Just now</div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-header">Total Stock Value</div>
+            <div class="stat-value">{{ total_stock_value }}</div>
+            <div class="stat-icon icon-blue"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">Active Shipments</div>
+            <div class="stat-value">{{ active_shipments }}</div>
+            <div class="stat-icon icon-purple"><i class="fa-solid fa-truck"></i></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">Low Stock Alerts</div>
+            <div class="stat-value">{{ low_stock_count }}</div>
+            {% if low_stock_count > 0 %}<div class="stat-badge badge-red">Action Required</div>{% endif %}
+            <div class="stat-icon icon-red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">Space Utilization</div>
+            <div class="stat-value">{{ space_utilization }}%</div>
+            <div class="progress-container">
+                <div class="progress-fill" style="width:{{ space_utilization }}%;"></div>
+            </div>
+            <div class="stat-icon icon-teal"><i class="fa-solid fa-warehouse"></i></div>
+        </div>
+    </div>
+
+    {% if not search_query %}
+        <div class="section-header">
+            <h2>Inventory Categories</h2>
+            <a href="{% url 'all_categories' %}" class="view-all">View All <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        
+        <div class="scroll-container">
+            <a href="{% url 'category_detail' 'Raw Materials' %}" class="category-card cat-card-link">
+                <i class="fa-solid fa-box-open cat-icon cat-icon-raw"></i><div class="cat-name">Raw Materials</div>
+            </a>
+            <a href="{% url 'category_detail' 'Finished Goods' %}" class="category-card cat-card-link">
+                <i class="fa-solid fa-briefcase cat-icon cat-icon-finished"></i><div class="cat-name">Finished Goods</div>
+            </a>
+            <a href="{% url 'category_detail' 'Packaging' %}" class="category-card cat-card-link">
+                <i class="fa-solid fa-cube cat-icon cat-icon-packaging"></i><div class="cat-name">Packaging</div>
+            </a>
+            <a href="{% url 'category_detail' 'Hardware' %}" class="category-card cat-card-link">
+                <i class="fa-solid fa-hammer cat-icon cat-icon-hardware"></i><div class="cat-name">Hardware</div>
+            </a>
+            <a href="{% url 'category_detail' 'Office' %}" class="category-card cat-card-link">
+                <i class="fa-solid fa-print cat-icon cat-icon-office"></i><div class="cat-name">Office</div>
+            </a>
+            <a href="{% url 'category_detail' 'Safety Gear' %}" class="category-card cat-card-link">
+                <i class="fa-solid fa-shield-halved cat-icon cat-icon-safety"></i><div class="cat-name">Safety Gear</div>
+            </a>
+            <a href="{% url 'category_detail' 'Electronics' %}" class="category-card cat-card-link">
+                <i class="fa-solid fa-microchip cat-icon cat-icon-electronics"></i><div class="cat-name">Electronics</div>
+            </a>
+            <a href="{% url 'category_detail' 'Maintenance' %}" class="category-card cat-card-link">
+                <i class="fa-solid fa-wrench cat-icon cat-icon-maintenance"></i><div class="cat-name">Maintenance</div>
+            </a>
+        </div>
+    {% endif %}
+
+    <div class="section-header">
+        {% if search_query %}
+            <h2>Search Results for "{{ search_query }}"</h2>
+            <a href="{% url 'warehouse_overview' %}{% if current_warehouse %}?warehouse_id={{ current_warehouse.id }}{% endif %}" class="view-all">Clear Search <i class="fa-solid fa-xmark"></i></a>
+        {% else %}
+            <h2>Recent Procurement</h2>
+        {% endif %}
+    </div>
+    
+    <div class="scroll-container" style="flex-wrap: wrap;">
+        {% for product in recent_products %}
+        <div class="product-card" style="margin-bottom: 20px;">
+            <div class="product-img" style="background:{{ product.card_color }};">
+                {% if product.image_url %}<img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-thumb">{% endif %}
+                <div class="sku-badge">SKU: {{ product.sku }}</div>
+            </div>
+            <div class="product-info">
+                <div class="product-title">{{ product.name }}</div>
+                <div class="product-meta">
+                    <div><div class="meta-label">Stock Level</div><div class="meta-value">{{ product.stock_level }} {{ product.unit_type }}</div></div>
+                    <i class="fa-solid fa-pen edit-icon"></i>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="empty-state-text">
+            {% if search_query %}
+                No products found matching "{{ search_query }}".
+            {% else %}
+                No products in this warehouse. Click "Admin Console" to add inventory.
+            {% endif %}
+        </p>
+        {% endfor %}
+    </div>
+
+    {% if not search_query %}
+        <div class="section-header">
+            <h2><i class="fa-solid fa-arrow-trend-up header-icon-blue"></i> High-Velocity Items</h2>
+        </div>
+        <div class="scroll-container">
+            {% for product in high_velocity_items %}
+            <div class="product-card">
+                <div class="product-img" style="background:{{ product.card_color }};">
+                    {% if product.image_url %}<img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-thumb">{% endif %}
+                    <div class="sku-badge">SKU: {{ product.sku }}</div>
+                </div>
+                <div class="product-info">
+                    <div class="product-title">{{ product.name }}</div>
+                    <div class="product-meta">
+                        <div><div class="meta-label">Moved This Month</div><div class="velocity-val">{{ product.moved_this_month }} {{ product.unit_type }}</div></div>
+                        <div class="trend-badge">{{ product.movement_trend }}</div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="empty-state-text">No high-velocity items marked.</p>
+            {% endfor %}
+        </div>
+
+        <div class="section-header">
+            <h2><i class="fa-solid fa-triangle-exclamation header-icon-red"></i> Low Stock Alerts</h2>
+            <a href="#" class="view-all view-all-red">View All Critical Items</a>
+        </div>
+        <div class="scroll-container" style="margin-bottom: 60px;">
+            {% for product in low_stock_items %}
+            <div class="product-card">
+                <div class="product-img" style="background:{{ product.card_color }};">
+                    {% if product.image_url %}<img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-thumb">{% endif %}
+                    <div class="alert-tag {{ product.alert_level }}">{{ product.alert_level }}</div>
+                </div>
+                <div class="product-info">
+                    <div class="product-title">{{ product.name }}</div>
+                    <div class="restock-footer">
+                        <div class="text-red-alert">{{ product.stock_level }} left</div>
+                        <a href="#" class="restock-btn">RESTOCK</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="empty-state-text">All stock levels are healthy!</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+</div>
+
+<footer class="site-footer">
+    <div>
+        <h2 class="footer-brand">
+            <img src="{% static 'images/cube-logo.png' %}" class="footer-logo-img"> Stockify
+        </h2>
+        <p class="footer-desc">Empowering businesses with intelligent inventory solutions. Built for clarity, speed, and growth.</p>
+        <div class="footer-socials">
+            <i class="fa-brands fa-linkedin footer-social-icon"></i>
+            <i class="fa-brands fa-x-twitter footer-social-icon"></i>
+            <i class="fa-brands fa-facebook footer-social-icon"></i>
+        </div>
+    </div>
+    
+    <div>
+        <h4 class="footer-heading">PRODUCT</h4>
+        <div class="footer-links">
+            <a href="{% url 'pricing' %}" class="footer-link">Pricing</a>
+            <a href="{% url 'landing_page' %}#features" class="footer-link">Features</a>
+            <a href="{% url 'roadmap' %}" class="footer-link">Roadmap</a>
+        </div>
+    </div>
+    
+    <div>
+        <h4 class="footer-heading">COMPANY</h4>
+        <div class="footer-links">
+            <a href="{% url 'about' %}" class="footer-link">About Us</a>
+            <a href="{% url 'careers' %}" class="footer-link">Careers</a>
+            <a href="{% url 'contact' %}" class="footer-link">Contact</a>
+        </div>
+    </div>
+    
+    <div>
+        <h4 class="footer-heading">STAY UPDATED</h4>
+        <form class="footer-form">
+            <input type="email" placeholder="Enter your email" class="footer-input">
+            <button type="submit" class="footer-btn">Subscribe</button>
+        </form>
+    </div>
+</footer>
+
+<script>
+    // --- 1. DROPDOWN LOGIC ---
+    const profileBtn = document.getElementById('profileDropdownBtn');
+    const profileMenu = document.getElementById('profileDropdown');
+    
+    const locationBtn = document.getElementById('locationDropdownBtn');
+    const locationMenu = document.getElementById('locationDropdown');
+
+    // Toggle Profile
+    profileBtn.addEventListener('click', function(e) {
+        profileMenu.classList.toggle('active');
+        locationMenu.classList.remove('active'); // Close the other one
+        e.stopPropagation(); 
+    });
+
+    // Toggle Locations
+    locationBtn.addEventListener('click', function(e) {
+        locationMenu.classList.toggle('active');
+        profileMenu.classList.remove('active'); // Close the other one
+        e.stopPropagation(); 
+    });
+
+    // Close clicking outside
+    document.addEventListener('click', function(e) {
+        if (!profileBtn.contains(e.target)) {
+            profileMenu.classList.remove('active');
+        }
+        if (!locationBtn.contains(e.target)) {
+            locationMenu.classList.remove('active');
+        }
+    });
+
+    // --- 2. BACK BUTTON INTERCEPT LOGIC ---
+    window.history.pushState(null, null, window.location.href);
+    
+    let isLinkClicked = false;
+
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('a')) {
+            isLinkClicked = true;
+        }
+    });
+
+    window.addEventListener('popstate', function(event) {
+        if (isLinkClicked) {
+            isLinkClicked = false; 
+            return; 
+        }
+        const leavePage = confirm("Are you sure you want to exit? You will be logged out.");
+        if (leavePage) {
+            window.location.href = "{% url 'logout' %}"; 
+        } else {
+            window.history.pushState(null, null, window.location.href);
+        }
+    });
+
+    // --- 3. FORCE SCROLL TO TOP ON RETURN ---
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+    window.addEventListener('pageshow', function() {
+        window.scrollTo(0, 0);
+    });
+</script>
+
+</body>
+</html>
