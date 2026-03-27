@@ -1,0 +1,316 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory Management - Stockify</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/admin_console.css' %}">
+<link rel="stylesheet" href="{% static 'css/console_inventory.css' %}">
+</head>
+<body>
+
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-header">
+                <img src="{% static 'images/cube-logo.png' %}" alt="Logo" style="filter: none;">
+                <div class="sidebar-brand-text">
+                    Stockify
+                    <span>Admin Console</span>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="{% if request.resolver_match.url_name == 'admin_console' %}active{% endif %}">
+                    <a href="{% url 'admin_console' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'inventory' %}active{% endif %}">
+                    <a href="{% url 'inventory' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-box"></i> Inventory</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
+                    <a href="{% url 'product_list' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-list"></i> Product List</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'stock_movement' %}active{% endif %}">
+                    <a href="{% url 'stock_movement' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-arrow-right-arrow-left"></i> Stock Movement</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'suppliers' %}active{% endif %}">
+                    <a href="{% url 'suppliers' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-truck"></i> Suppliers</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
+                    <a href="{% url 'orders' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-cart-shopping"></i> Orders</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+                    <a href="{% url 'analytics' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+                </li>
+            </ul>
+        </div>
+        <div class="sidebar-user">
+            <div class="avatar">{{ user.username|make_list|first|upper }}</div>
+            <div style="font-size: 14px; font-weight: 600;">{{ user.username }}</div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="header-row">
+            <div class="header-titles">
+                <div class="breadcrumbs">Warehouse <i class="fa-solid fa-chevron-right"></i> <b>Full Inventory</b></div>
+                <div class="page-title">Inventory Management</div>
+            </div>
+            
+            <form method="GET" action="{% url 'inventory' %}" class="header-search">
+                {% if request.GET.warehouse_id %}
+                    <input type="hidden" name="warehouse_id" value="{{ request.GET.warehouse_id }}">
+                {% endif %}
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Search product by name, SKU, or category...">
+                <button type="submit" style="display:none;"></button>
+            </form>
+
+            <div class="header-actions">
+                <button class="btn-outline-dark"><i class="fa-solid fa-arrow-up-from-bracket"></i> Import</button>
+                <a href="{% url 'add_product' %}{% if current_warehouse %}?warehouse_id={{ current_warehouse.id }}{% endif %}" style="text-decoration:none;">
+                    <button class="btn-primary"><i class="fa-solid fa-plus"></i> New Product</button>
+                </a>
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon blue-icon"><i class="fa-solid fa-money-bill-1-wave"></i></div>
+                <div class="metric-content">
+                    <div class="metric-label">TOTAL SKU VALUE</div>
+                    <div class="metric-value">{{ total_store_value }}</div>
+                    <div class="metric-trend text-green">+2.5% vs last month</div>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-icon orange-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="metric-content">
+                    <div class="metric-label">LOW STOCK ITEMS</div>
+                    <div class="metric-value">{{ low_stock }} Items</div>
+                    <div class="metric-trend text-orange">Needs Re-ordering</div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon green-icon"><i class="fa-solid fa-shapes"></i></div>
+                <div class="metric-content">
+                    <div class="metric-label">TOP CATEGORY</div>
+                    <div class="metric-value">{{ top_category }}</div>
+                    <div class="metric-trend text-muted">Highest volume</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="inventory-table-container">
+            
+            <div class="table-filters">
+                <div class="filter-dropdowns">
+                    <select class="filter-select"><option>All Categories</option></select>
+                    <select class="filter-select"><option>All Status</option></select>
+                    
+                    <div class="location-dropdown" id="locationDropdownBtn">
+                        {% if current_warehouse %}
+                            {{ current_warehouse.name }}
+                        {% else %}
+                            All Warehouses
+                        {% endif %}
+                        <i class="fa-solid fa-chevron-down" style="margin-left: 8px;"></i>
+                        
+                        <div class="location-menu" id="locationDropdown">
+                            <div class="dropdown-header">
+                                <strong>Your Locations</strong>
+                                <span>Select to switch inventory view</span>
+                            </div>
+                            <hr>
+                            {% for wh in warehouses %}
+                                <a href="?warehouse_id={{ wh.id }}{% if search_query %}&search={{ search_query }}{% endif %}" class="{% if current_warehouse and current_warehouse.id == wh.id %}active-location{% endif %}">
+                                    <i class="fa-solid fa-warehouse"></i> {{ wh.name }} <span style="font-size: 12px; opacity: 0.7; margin-left: 4px;">({{ wh.location }})</span>
+                                </a>
+                            {% empty %}
+                                <span class="empty-location">No locations added.</span>
+                            {% endfor %}
+                            <hr>
+                            <a href="{% url 'manage_warehouses' %}" class="manage-wh-link"><i class="fa-solid fa-plus"></i> Add Locations</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="last-updated">
+                    Last updated: Today, 10:42 AM <i class="fa-solid fa-rotate-right"></i>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>PRODUCT</th>
+                            <th>SKU</th>
+                            <th>CATEGORY</th>
+                            <th>LOCATION</th>
+                            <th>STOCK LEVEL</th>
+                            <th>PRICE</th>
+                            <th>STATUS</th>
+                            <th style="text-align: center;">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr>
+                            <td>
+                                <div class="product-cell">
+                                    {% if product.image_url %}
+                                        <img src="{{ product.image_url }}" alt="Product" class="product-circle">
+                                    {% else %}
+                                        <div class="product-circle fallback-circle">
+                                            <i class="fa-solid fa-box"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="product-info">
+                                        <div class="product-name">{{ product.name }}</div>
+                                        <div class="product-brand">{{ product.category.name|default:"General" }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-muted font-mono">{{ product.sku }}</td>
+                            <td><span class="cat-pill blue-pill">{{ product.category.name }}</span></td>
+                            <td class="text-muted">{{ product.warehouse.name|default:"Main Aisle" }}</td>
+                            <td>
+                                <div class="stock-level-container">
+                                    <div class="stock-text">
+                                        <strong>{{ product.stock_level }} units</strong>
+                                        <span class="stock-percent">
+                                            {% if product.stock_level > 100 %}85%{% elif product.stock_level > 20 %}45%{% else %}10%{% endif %}
+                                        </span>
+                                    </div>
+                                    <div class="progress-bg">
+                                        {% if product.stock_level == 0 %}
+                                            <div class="progress-fill fill-red" style="width: 5%;"></div>
+                                        {% elif product.is_low_stock %}
+                                            <div class="progress-fill fill-orange" style="width: 25%;"></div>
+                                        {% elif product.stock_level > 100 %}
+                                            <div class="progress-fill fill-green" style="width: 85%;"></div>
+                                        {% else %}
+                                            <div class="progress-fill fill-green" style="width: 45%;"></div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="font-bold">₹{{ product.price }}</td>
+                            <td>
+                                {% if product.stock_level == 0 %}
+                                    <span class="status-pill status-out">Out of Stock</span>
+                                {% elif product.is_low_stock %}
+                                    <span class="status-pill status-low">Low Stock</span>
+                                {% else %}
+                                    <span class="status-pill status-in">In Stock</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: center;">
+                                <a href="{% url 'edit_product' product.id %}{% if current_warehouse %}?warehouse_id={{ current_warehouse.id }}{% endif %}" title="Edit Product">
+                                    <i class="fa-solid fa-pen table-action"></i>
+                                </a>
+                                <i class="fa-solid fa-trash table-action" title="Delete Product"
+                                   onclick="openDeleteModal('{{ product.id }}', '{{ product.name|escapejs }}')"></i>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" style="text-align:center; padding: 60px; color:#64748b;">
+                                <i class="fa-solid fa-box-open" style="font-size: 35px; margin-bottom: 15px; color:#cbd5e1;"></i>
+                                <br><strong style="font-size: 16px; color:#0f172a;">No products found</strong>
+                                {% if search_query %}
+                                <br>No products matched your search for "{{ search_query }}".
+                                {% else %}
+                                <br>There are currently no items in this warehouse.
+                                <br><br>
+                                <a href="{% url 'add_product' %}?warehouse_id={{ current_warehouse.id }}" style="text-decoration:none;">
+                                    <button class="btn-primary"><i class="fa-solid fa-plus"></i> Add Product</button>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-footer">
+                <div class="pagination-info">Showing {% if products %}1{% else %}0{% endif %} to {{ products|length }} of {{ total_products }} results</div>
+                <div class="pagination-controls">
+                    <button class="page-btn">Previous</button>
+                    <button class="page-btn active-btn">Next</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<div class="delete-modal-overlay" id="deleteModal">
+    <div class="delete-modal-card">
+        <div class="delete-modal-icon">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h3>Delete Product</h3>
+        <p>Are you sure you want to delete <strong id="deleteProductName"></strong>? This action cannot be undone.</p>
+        <form id="deleteForm" method="POST">
+            {% csrf_token %}
+            <div class="delete-modal-actions">
+                <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button type="submit" class="btn-modal-delete"><i class="fa-solid fa-trash"></i> Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Location Dropdown Logic
+    const locationBtn = document.getElementById('locationDropdownBtn');
+    const locationMenu = document.getElementById('locationDropdown');
+
+    if (locationBtn) {
+        locationBtn.addEventListener('click', function(e) {
+            locationMenu.classList.toggle('active');
+            e.stopPropagation(); 
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        if (locationBtn && !locationBtn.contains(e.target)) {
+            locationMenu.classList.remove('active');
+        }
+    });
+
+    // Delete Modal Logic
+    function openDeleteModal(productId, productName) {
+        const modal = document.getElementById('deleteModal');
+        const form = document.getElementById('deleteForm');
+        const nameEl = document.getElementById('deleteProductName');
+
+        nameEl.textContent = productName;
+        form.action = '/admin-console/inventory/delete/' + productId + '/';
+        modal.classList.add('active');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.remove('active');
+    }
+
+    // Close modal on overlay click
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeDeleteModal();
+    });
+</script>
+
+</body>
+</html>

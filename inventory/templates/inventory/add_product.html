@@ -1,0 +1,298 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add New Stock - Stockify</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/admin_console.css' %}">
+<link rel="stylesheet" href="{% static 'css/add_product.css' %}">
+</head>
+<body>
+
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-header">
+                <img src="{% static 'images/cube-logo.png' %}" alt="Logo" style="filter: none;">
+                <div class="sidebar-brand-text">
+                    Stockify
+                    <span>Admin Console</span>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="{% if request.resolver_match.url_name == 'admin_console' %}active{% endif %}">
+                    <a href="{% url 'admin_console' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'inventory' %}active{% endif %}">
+                    <a href="{% url 'inventory' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-box"></i> Inventory</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
+                    <a href="{% url 'product_list' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-list"></i> Product List</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'stock_movement' %}active{% endif %}">
+                    <a href="{% url 'stock_movement' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-arrow-right-arrow-left"></i> Stock Movement</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'suppliers' %}active{% endif %}">
+                    <a href="{% url 'suppliers' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-truck"></i> Suppliers</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
+                    <a href="{% url 'orders' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-cart-shopping"></i> Orders</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+                    <a href="{% url 'analytics' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+                </li>
+            </ul>
+        </div>
+        <div class="sidebar-user">
+            <div class="avatar">{{ user.username|make_list|first|upper }}</div>
+            <div style="font-size: 14px; font-weight: 600;">{{ user.username }}</div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-bar">
+            <div>
+                <div class="breadcrumbs">
+                    <a href="{% url 'admin_console' %}{% if current_warehouse %}?warehouse_id={{ current_warehouse.id }}{% endif %}" style="text-decoration:none; color:inherit;">Admin Console</a>
+                    <i class="fa-solid fa-chevron-right" style="font-size:10px; margin:0 5px;"></i>
+                    <b>Add New Stock</b>
+                </div>
+                <div class="page-title">Add New Product</div>
+            </div>
+
+            <div class="action-buttons" style="display: flex; align-items: center; gap: 15px;">
+                <div class="location-dropdown" id="locationDropdownBtn">
+                    <i class="fa-solid fa-circle" style="color: #10b981; font-size: 8px;"></i>
+                    {% if current_warehouse %}
+                        {{ current_warehouse.name }} <span style="color: #64748b; font-weight: 500; margin-left: 2px;">({{ current_warehouse.location }})</span>
+                    {% else %}
+                        No Locations Added
+                    {% endif %}
+                    <i class="fa-solid fa-chevron-down" style="margin-left: 4px;"></i>
+
+                    <div class="location-menu" id="locationDropdown">
+                        <div class="dropdown-header">
+                            <strong>Your Locations</strong>
+                            <span>Select to switch inventory view</span>
+                        </div>
+                        <hr>
+                        {% for wh in warehouses %}
+                            <a href="?warehouse_id={{ wh.id }}" class="{% if current_warehouse and current_warehouse.id == wh.id %}active-location{% endif %}">
+                                <i class="fa-solid fa-warehouse"></i> {{ wh.name }} <span style="font-size: 12px; opacity: 0.7; margin-left: 4px;">({{ wh.location }})</span>
+                            </a>
+                        {% empty %}
+                            <span class="empty-location">No locations added.</span>
+                        {% endfor %}
+                        <hr>
+                        <a href="{% url 'manage_warehouses' %}" class="manage-wh-link"><i class="fa-solid fa-plus"></i> Add Locations</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                <i class="fa-solid {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-card-icon"><i class="fa-solid fa-box-open"></i></div>
+                <div>
+                    <h2>Product Details</h2>
+                    <p>Fill in the information below to add a new product to your inventory.</p>
+                </div>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" id="addProductForm">
+                {% csrf_token %}
+
+                <div class="form-grid">
+                    
+                    <div class="form-group full-width" style="margin-bottom: 20px;">
+                        <label for="id_name"><i class="fa-solid fa-tag"></i> Product Name *</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}<span class="field-error">{{ form.name.errors.0 }}</span>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_sku"><i class="fa-solid fa-barcode"></i> SKU / Barcode *</label>
+                        {{ form.sku }}
+                        {% if form.sku.errors %}<span class="field-error">{{ form.sku.errors.0 }}</span>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_category"><i class="fa-solid fa-layer-group"></i> Category *</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}<span class="field-error">{{ form.category.errors.0 }}</span>{% endif %}
+                    </div>
+
+                    <div class="form-group full-width" style="margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                        <h4 style="margin: 0; font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fa-solid fa-list-check"></i> Specifications</h4>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Brand</label>
+                        <input type="text" name="brand" class="form-control" value="{{ form.brand.value|default_if_none:'' }}" placeholder="e.g. IKEA, Logitech">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Manufacturer</label>
+                        <input type="text" name="manufacturer" class="form-control" value="{{ form.manufacturer.value|default_if_none:'' }}" placeholder="e.g. IKEA Systems">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Weight</label>
+                        <input type="text" name="weight" class="form-control" value="{{ form.weight.value|default_if_none:'' }}" placeholder="e.g. 1.2kg, 500g">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Dimensions</label>
+                        <input type="text" name="dimensions" class="form-control" value="{{ form.dimensions.value|default_if_none:'' }}" placeholder="e.g. 15x15x40 cm">
+                    </div>
+
+                    <div class="form-group full-width" style="margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                        <h4 style="margin: 0; font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fa-solid fa-boxes-stacked"></i> Pricing & Stock</h4>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cost Price (₹)</label>
+                        <input type="number" step="0.01" name="cost_price" class="form-control" value="{{ form.cost_price.value|default_if_none:'' }}" placeholder="0.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_price"><i class="fa-solid fa-indian-rupee-sign"></i> Selling Price (₹) *</label>
+                        {{ form.price }}
+                        {% if form.price.errors %}<span class="field-error">{{ form.price.errors.0 }}</span>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_stock_level"><i class="fa-solid fa-cubes"></i> Initial Stock Level</label>
+                        {{ form.stock_level }}
+                        {% if form.stock_level.errors %}<span class="field-error">{{ form.stock_level.errors.0 }}</span>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_unit_type"><i class="fa-solid fa-weight-scale"></i> Unit Type</label>
+                        {{ form.unit_type }}
+                        {% if form.unit_type.errors %}<span class="field-error">{{ form.unit_type.errors.0 }}</span>{% endif %}
+                    </div>
+
+                    <div class="form-group full-width" style="display: flex; gap: 30px; margin-top: 15px; padding: 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight: 600; color: #334155; font-size: 14px;">
+                            <input type="checkbox" name="is_low_stock" {% if form.is_low_stock.value %}checked{% endif %} style="width: 18px; height: 18px; accent-color: #2563eb;">
+                            Trigger Low Stock Alert
+                        </label>
+                        <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight: 600; color: #334155; font-size: 14px;">
+                            <input type="checkbox" name="is_high_velocity" {% if form.is_high_velocity.value %}checked{% endif %} style="width: 18px; height: 18px; accent-color: #2563eb;">
+                            Mark as High Velocity Item
+                        </label>
+                    </div>
+                </div>
+
+                <div class="upload-section">
+                    <label><i class="fa-solid fa-image"></i> Product Image</label>
+                    <div class="dropzone" id="dropzone">
+                        <input type="file" name="product_image" id="product-image-input" accept="image/*">
+                        <div class="dropzone-content" id="dropzone-content">
+                            <div class="dropzone-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                            <p><strong>Click to upload</strong> or drag and drop</p>
+                            <span>PNG, JPG, WEBP up to 20MB</span>
+                        </div>
+                        <div class="image-preview" id="image-preview" style="display:none;">
+                            <img id="preview-img" src="" alt="Preview">
+                            <button type="button" class="remove-img-btn" id="remove-img"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{% url 'product_list' %}{% if current_warehouse %}?warehouse_id={{ current_warehouse.id }}{% endif %}" class="btn-cancel">
+                        <i class="fa-solid fa-xmark"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn-save" id="save-btn">
+                        <i class="fa-solid fa-check"></i> Save Product
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Location dropdown
+    const locationBtn = document.getElementById('locationDropdownBtn');
+    const locationMenu = document.getElementById('locationDropdown');
+    if (locationBtn) {
+        locationBtn.addEventListener('click', function(e) {
+            locationMenu.classList.toggle('active');
+            e.stopPropagation();
+        });
+    }
+    document.addEventListener('click', function(e) {
+        if (locationBtn && !locationBtn.contains(e.target)) {
+            locationMenu.classList.remove('active');
+        }
+    });
+
+    // Image upload interaction
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('product-image-input');
+    const dropzoneContent = document.getElementById('dropzone-content');
+    const imagePreview = document.getElementById('image-preview');
+    const previewImg = document.getElementById('preview-img');
+    const removeBtn = document.getElementById('remove-img');
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            showPreview(e.dataTransfer.files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) showPreview(fileInput.files[0]);
+    });
+
+    function showPreview(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            dropzoneContent.style.display = 'none';
+            imagePreview.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fileInput.value = '';
+        previewImg.src = '';
+        imagePreview.style.display = 'none';
+        dropzoneContent.style.display = 'flex';
+    });
+
+    // Prevent double submit
+    document.getElementById('addProductForm').addEventListener('submit', function() {
+        const btn = document.getElementById('save-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+    });
+</script>
+
+</body>
+</html>

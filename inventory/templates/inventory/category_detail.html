@@ -1,0 +1,160 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stockify - {{ category_name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{% static 'css/category_detail.css' %}">
+</head>
+<body>
+
+    <nav class="app-nav">
+        <div class="nav-left">
+            <a href="{% url 'warehouse_overview' %}" class="logo">
+                <img src="{% static 'images/cube-logo.png' %}" alt="Logo"> Stockify
+            </a>
+            
+            <div class="location-dropdown" id="locationDropdownBtn">
+                <i class="fa-solid fa-circle"></i> 
+                {% if current_warehouse %}
+                    {{ current_warehouse.name }} <span>({{ current_warehouse.location }})</span>
+                {% else %}
+                    No Locations Added
+                {% endif %}
+                <i class="fa-solid fa-chevron-down" style="margin-left: 4px;"></i>
+                
+                <div class="profile-dropdown-menu location-menu" id="locationDropdown">
+                    <div class="dropdown-header">
+                        <strong>Your Locations</strong>
+                        <span>Select to switch inventory view</span>
+                    </div>
+                    <hr>
+                    {% for wh in warehouses %}
+                        <a href="?warehouse_id={{ wh.id }}" class="{% if current_warehouse and current_warehouse.id == wh.id %}active-location{% endif %}">
+                            <i class="fa-solid fa-warehouse"></i> {{ wh.name }} <span style="font-size: 12px; opacity: 0.7; margin-left: 4px;">({{ wh.location }})</span>
+                        </a>
+                    {% empty %}
+                        <span class="empty-location">No locations added.</span>
+                    {% endfor %}
+                    <hr>
+                    <a href="{% url 'manage_warehouses' %}" class="manage-wh-link"><i class="fa-solid fa-plus"></i> Add Locations</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <a href="{% url 'admin_console' %}" class="admin-btn admin-btn-link"><i class="fa-solid fa-shield-halved"></i> Admin Console</a>
+            
+            <a href="{% url 'notifications' %}" class="nav-icon-link">
+                <i class="fa-regular fa-bell nav-icons"></i>
+            </a>
+            
+            <div class="user-profile" id="profileDropdownBtn">
+                <div class="avatar">{{ user.username|make_list|first|upper }}</div> 
+                {{ user.username }} <i class="fa-solid fa-chevron-down"></i>
+                
+                <div class="profile-dropdown-menu" id="profileDropdown">
+                    <div class="dropdown-header">
+                        <strong>{{ user.username }}</strong>
+                        <span>{{ user.email }}</span>
+                    </div>
+                    <hr>
+                    <a href="{% url 'edit_profile' %}"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
+                    <a href="{% url 'manage_warehouses' %}"><i class="fa-solid fa-warehouse"></i> Manage Warehouses</a>
+                    <a href="{% url 'logout' %}" class="text-red"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        
+        <div class="page-header">
+            <div>
+                <a href="{% url 'all_categories' %}" class="back-link">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Categories
+                </a>
+                <h1 class="page-title">{{ category_name }}</h1>
+            </div>
+            <div class="item-count">{{ products|length }} Items Found</div>
+        </div>
+
+        <div class="product-grid">
+            {% for product in products %}
+                <div class="product-card">
+                    <div class="product-img" style="background:{{ product.card_color }};">
+                        {% if product.image_url %}<img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-thumb">{% endif %}
+                        <div class="sku-badge">SKU: {{ product.sku }}</div>
+                        {% if product.is_low_stock %}
+                            <div class="alert-tag {{ product.alert_level }}">LOW STOCK</div>
+                        {% endif %}
+                    </div>
+                    <div class="product-info">
+                        <div class="product-title">{{ product.name }}</div>
+                        <div class="product-meta">
+                            <div>
+                                <div class="meta-label">Stock Level</div>
+                                <div class="meta-value">{{ product.stock_level }} {{ product.unit_type }}</div>
+                            </div>
+                            <i class="fa-solid fa-pen edit-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty-state">
+                    <i class="fa-solid fa-box-open"></i>
+                    <h2>No inventory found</h2>
+                    <p>There are currently no products listed under {{ category_name }} in this location.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div>
+            <h2 class="footer-brand"><img src="{% static 'images/cube-logo.png' %}" class="footer-logo-img"> Stockify</h2>
+            <p class="footer-desc">Empowering businesses with intelligent inventory solutions. Built for clarity, speed, and growth.</p>
+            <div class="footer-socials">
+                <i class="fa-brands fa-linkedin footer-social-icon"></i>
+                <i class="fa-brands fa-x-twitter footer-social-icon"></i>
+                <i class="fa-brands fa-facebook footer-social-icon"></i>
+            </div>
+        </div>
+        <div>
+            <h4 class="footer-heading">PRODUCT</h4>
+            <div class="footer-links"><a href="{% url 'pricing' %}" class="footer-link">Pricing</a><a href="{% url 'landing_page' %}#features" class="footer-link">Features</a><a href="{% url 'roadmap' %}" class="footer-link">Roadmap</a></div>
+        </div>
+        <div>
+            <h4 class="footer-heading">COMPANY</h4>
+            <div class="footer-links"><a href="{% url 'about' %}" class="footer-link">About Us</a><a href="{% url 'careers' %}" class="footer-link">Careers</a><a href="{% url 'contact' %}" class="footer-link">Contact</a></div>
+        </div>
+        <div>
+            <h4 class="footer-heading">STAY UPDATED</h4>
+            <form class="footer-form">
+                <input type="email" placeholder="Enter your email" class="footer-input">
+                <button type="submit" class="footer-btn">Subscribe</button>
+            </form>
+        </div>
+    </footer>
+
+    <script>
+        // Dropdown Logic
+        const profileBtn = document.getElementById('profileDropdownBtn');
+        const profileMenu = document.getElementById('profileDropdown');
+        const locationBtn = document.getElementById('locationDropdownBtn');
+        const locationMenu = document.getElementById('locationDropdown');
+
+        if (profileBtn) profileBtn.addEventListener('click', e => { profileMenu.classList.toggle('active'); if(locationMenu) locationMenu.classList.remove('active'); e.stopPropagation(); });
+        if (locationBtn) locationBtn.addEventListener('click', e => { locationMenu.classList.toggle('active'); if(profileMenu) profileMenu.classList.remove('active'); e.stopPropagation(); });
+        document.addEventListener('click', e => {
+            if (profileBtn && !profileBtn.contains(e.target)) profileMenu.classList.remove('active');
+            if (locationBtn && !locationBtn.contains(e.target)) locationMenu.classList.remove('active');
+        });
+    </script>
+
+</body>
+</html>

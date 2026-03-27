@@ -1,0 +1,205 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Console - Stockify</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/admin_console.css' %}">
+</head>
+<body>
+
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-header">
+                <img src="{% static 'images/cube-logo.png' %}" alt="Logo" style="filter: none;">
+                <div class="sidebar-brand-text">
+                    Stockify
+                    <span>Admin Console</span>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="{% if request.resolver_match.url_name == 'admin_console' %}active{% endif %}">
+                    <a href="{% url 'admin_console' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'inventory' %}active{% endif %}">
+                    <a href="{% url 'inventory' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-box"></i> Inventory</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
+                    <a href="{% url 'product_list' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-list"></i> Product List</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'stock_movement' %}active{% endif %}">
+                    <a href="{% url 'stock_movement' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-arrow-right-arrow-left"></i> Stock Movement</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'suppliers' %}active{% endif %}">
+                    <a href="{% url 'suppliers' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-truck"></i> Suppliers</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
+                    <a href="{% url 'orders' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-cart-shopping"></i> Orders</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+                    <a href="{% url 'analytics' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+                </li>
+            </ul>
+        </div>
+        <div class="sidebar-user">
+            <div class="avatar">{{ user.username|make_list|first|upper }}</div>
+            <div style="font-size: 14px; font-weight: 600;">{{ user.username }}</div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-bar">
+            <div>
+                <div class="breadcrumbs"><a href="{% url 'warehouse_overview' %}" style="text-decoration:none; color:inherit;">Warehouse Overview</a> <i class="fa-solid fa-chevron-right" style="font-size:10px; margin:0 5px;"></i> <b>Dashboard</b></div>
+                <div class="page-title">Overview</div>
+            </div>
+            
+            <div class="action-buttons" style="display: flex; align-items: center; gap: 15px;">
+                
+                <div class="location-dropdown" id="locationDropdownBtn">
+                    <i class="fa-solid fa-circle" style="color: #10b981; font-size: 8px;"></i> 
+                    {% if current_warehouse %}
+                        {{ current_warehouse.name }} <span style="color: #64748b; font-weight: 500; margin-left: 2px;">({{ current_warehouse.location }})</span>
+                    {% else %}
+                        No Locations Added
+                    {% endif %}
+                    <i class="fa-solid fa-chevron-down" style="margin-left: 4px;"></i>
+                    
+                    <div class="location-menu" id="locationDropdown">
+                        <div class="dropdown-header">
+                            <strong>Your Locations</strong>
+                            <span>Select to switch inventory view</span>
+                        </div>
+                        <hr>
+                        {% for wh in warehouses %}
+                            <a href="?warehouse_id={{ wh.id }}" class="{% if current_warehouse and current_warehouse.id == wh.id %}active-location{% endif %}">
+                                <i class="fa-solid fa-warehouse"></i> {{ wh.name }} <span style="font-size: 12px; opacity: 0.7; margin-left: 4px;">({{ wh.location }})</span>
+                            </a>
+                        {% empty %}
+                            <span class="empty-location">No locations added.</span>
+                        {% endfor %}
+                        <hr>
+                        <a href="{% url 'manage_warehouses' %}" class="manage-wh-link"><i class="fa-solid fa-plus"></i> Add Locations</a>
+                    </div>
+                </div>
+
+                <a href="{% url 'export_report' %}{% if current_warehouse %}?warehouse_id={{ current_warehouse.id }}{% endif %}" class="btn-outline" style="text-decoration:none;"><i class="fa-solid fa-download"></i> Export Report</a>
+                <a href="{% url 'add_product' %}{% if current_warehouse %}?warehouse_id={{ current_warehouse.id }}{% endif %}" class="btn-primary" style="text-decoration:none;"><i class="fa-solid fa-plus"></i> Add New Stock</a>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-title">Total Products <i class="fa-solid fa-box" style="color:#e2e8f0; font-size:20px;"></i></div>
+                <div class="stat-number">{{ total_products }} <span class="trend-up"><i class="fa-solid fa-arrow-trend-up"></i> +2.5%</span></div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title">Total Store Value <i class="fa-solid fa-money-bill-wave" style="color:#e2e8f0; font-size:20px;"></i></div>
+                <div class="stat-number">{{ total_store_value }} <span class="trend-up"><i class="fa-solid fa-arrow-trend-up"></i> +12%</span></div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title">Out of Stock <i class="fa-solid fa-cart-shopping" style="color:#fee2e2; font-size:20px;"></i></div>
+                <div class="stat-number" style="color:#dc2626;">{{ out_of_stock }} <span style="font-size:14px; font-weight:600; color:#ef4444;">Items</span></div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title">Low Stock <i class="fa-solid fa-triangle-exclamation" style="color:#ffedd5; font-size:20px;"></i></div>
+                <div class="stat-number" style="color:#ea580c;">{{ low_stock }} <span style="font-size:12px; font-weight:600; color:#f97316;">Needs Attention</span></div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Recent Products</div>
+                    <a href="#" style="color:#3B82F6; font-size:14px; font-weight:600; text-decoration:none;">View All</a>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Product ID</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Qty</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in recent_products %}
+                        <tr>
+                            <td>{% if product.image_url %}<img src="{{ product.image_url }}" alt="" style="width:36px;height:36px;border-radius:8px;object-fit:cover;">{% else %}<div style="width:36px;height:36px;border-radius:8px;background:{{ product.card_color }};"></div>{% endif %}</td>
+                            <td style="color:#64748B;">#PROD-{{ product.id|stringformat:"03d" }}</td>
+                            <td>{{ product.name }}</td>
+                            <td style="color:#8B5CF6;">{{ product.category.name }}</td>
+                            <td>₹{{ product.price }}</td>
+                            <td>{{ product.stock_level }}</td>
+                            <td>
+                                {% if product.stock_level == 0 %}
+                                    <span class="badge badge-out">Out of Stock</span>
+                                {% elif product.is_low_stock %}
+                                    <span class="badge badge-low">Low Stock</span>
+                                {% else %}
+                                    <span class="badge badge-in">In Stock</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:30px;">No products in database yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div>
+                <div class="card">
+                    <div class="card-header"><div class="card-title">Stock by Category</div></div>
+                    <div class="doughnut">
+                        <div class="doughnut-inner">
+                            <div style="font-size:10px; font-weight:600; color:#64748B; letter-spacing:1px;">TOTAL</div>
+                            <div style="font-size:24px; font-weight:800;">{{ total_products }}</div>
+                        </div>
+                    </div>
+                    <ul class="legend">
+                        <li><div><span class="legend-dot" style="background:#3B82F6;"></span> Electronics</div> <b>35%</b></li>
+                        <li><div><span class="legend-dot" style="background:#A855F7;"></span> Furniture</div> <b>25%</b></li>
+                        <li><div><span class="legend-dot" style="background:#10B981;"></span> Accessories</div> <b>25%</b></li>
+                        <li><div><span class="legend-dot" style="background:#F59E0B;"></span> Stationary</div> <b>15%</b></li>
+                    </ul>
+                </div>
+
+                <div class="alert-box">
+                    <h4><i class="fa-solid fa-lightbulb" style="color:#3B82F6;"></i> Restock Alert</h4>
+                    <p>{{ low_stock }} items are running low. Review the Low Stock report to create purchase orders.</p>
+                    <a href="#">View Low Stock Report</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // JS to open and close the location dropdown in Admin Console
+    const locationBtn = document.getElementById('locationDropdownBtn');
+    const locationMenu = document.getElementById('locationDropdown');
+
+    if (locationBtn) {
+        locationBtn.addEventListener('click', function(e) {
+            locationMenu.classList.toggle('active');
+            e.stopPropagation(); 
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        if (locationBtn && !locationBtn.contains(e.target)) {
+            locationMenu.classList.remove('active');
+        }
+    });
+</script>
+
+</body>
+</html>

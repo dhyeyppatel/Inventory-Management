@@ -1,0 +1,330 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product List - Stockify Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/admin_console.css' %}">
+<link rel="stylesheet" href="{% static 'css/product_list.css' %}">
+</head>
+<body>
+
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-header">
+                <img src="{% static 'images/cube-logo.png' %}" alt="Logo" style="filter: none;">
+                <div class="sidebar-brand-text">
+                    Stockify
+                    <span>Admin Console</span>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="{% if request.resolver_match.url_name == 'admin_console' %}active{% endif %}">
+                    <a href="{% url 'admin_console' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'inventory' %}active{% endif %}">
+                    <a href="{% url 'inventory' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-box"></i> Inventory</a>
+                </li>
+                <li class="active">
+                    <a href="{% url 'product_list' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-list"></i> Product List</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'stock_movement' %}active{% endif %}">
+                    <a href="{% url 'stock_movement' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-arrow-right-arrow-left"></i> Stock Movement</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'suppliers' %}active{% endif %}">
+                    <a href="{% url 'suppliers' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-truck"></i> Suppliers</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
+                    <a href="{% url 'orders' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-cart-shopping"></i> Orders</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+                    <a href="{% url 'analytics' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+                </li>
+            </ul>
+        </div>
+        <div class="sidebar-user">
+            <div class="avatar">{{ user.username|make_list|first|upper }}</div>
+            <div style="font-size: 14px; font-weight: 600;">{{ user.username }}</div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="header-row">
+            <div class="header-titles">
+                <div class="breadcrumbs">Inventory <i class="fa-solid fa-chevron-right"></i> <b>Product List</b></div>
+                <div class="page-title">Product List</div>
+            </div>
+            
+            <form method="GET" action="{% url 'product_list' %}" class="header-search">
+                {% if request.GET.warehouse_id %}
+                    <input type="hidden" name="warehouse_id" value="{{ request.GET.warehouse_id }}">
+                {% endif %}
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Search product by name, SKU, or category...">
+                <button type="submit" style="display:none;"></button>
+                <i class="fa-solid fa-sliders" style="right: 15px; left: auto; cursor: pointer;"></i>
+            </form>
+
+            <div class="header-actions">
+                <button class="btn-outline-dark"><i class="fa-solid fa-arrow-up-from-bracket"></i> Import/Export <i class="fa-solid fa-chevron-down" style="font-size:10px; margin-left:6px;"></i></button>
+                <a href="{% url 'add_product' %}{% if current_warehouse %}?warehouse_id={{ current_warehouse.id }}{% endif %}" style="text-decoration:none;">
+                    <button class="btn-primary"><i class="fa-solid fa-plus"></i> Add New Product</button>
+                </a>
+            </div>
+        </div>
+
+        <div class="card full-width filter-card">
+            <div class="filter-controls">
+                <span class="filter-label">FILTERS:</span>
+                <select class="filter-select"><option>All Brands</option></select>
+                <select class="filter-select"><option>All Categories</option></select>
+                <select class="filter-select"><option>Price Range</option></select>
+                <select class="filter-select"><option>Manufacturer</option></select>
+            </div>
+            <button class="clear-filters-btn" onclick="window.location.href='{% url 'product_list' %}'"><i class="fa-solid fa-xmark"></i> Clear All</button>
+        </div>
+
+        <div class="product-cards-wrapper">
+            {% for product in products %}
+            <div class="product-card-ui">
+                
+                <div class="card-img-box">
+                    {% if product.image_url %}
+                        <img src="{{ product.image_url }}" alt="Product Image">
+                    {% else %}
+                        <div class="fallback-img"><i class="fa-solid fa-box"></i></div>
+                    {% endif %}
+                    
+                    {% if product.stock_level == 0 %}
+                        <span class="img-badge badge-out">Out of Stock</span>
+                    {% elif product.is_low_stock %}
+                        <span class="img-badge badge-low">Low Stock</span>
+                    {% else %}
+                        <span class="img-badge badge-in">In Stock</span>
+                    {% endif %}
+                </div>
+
+                <div class="card-info-box">
+                    <h3 class="card-title">{{ product.name }}</h3>
+                    <div class="card-cat-sku">
+                        <span class="cat-pill blue-pill">{{ product.category.name|default:"General" }}</span> 
+                        <span class="sku-text">SKU: {{ product.sku }}</span>
+                    </div>
+                    <div class="attributes-grid">
+                        <div><strong>Brand:</strong> {{ product.brand|default:"Generic" }}</div>
+                        <div><strong>Mfr:</strong> {{ product.manufacturer|default:"Unknown" }}</div>
+                        <div><strong>Weight:</strong> {{ product.weight|default:"--" }}</div>
+                        <div><strong>Dim:</strong> {{ product.dimensions|default:"--" }}</div>
+                    </div>
+                </div>
+
+                <div class="card-pricing-box">
+                    <div class="price-row">
+                        <span class="price-label">Selling Price</span>
+                        <span class="sell-price">₹{{ product.price }}</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="price-label">Cost Price</span>
+                        <span class="cost-price">₹{{ product.cost_price|default:"--" }}</span>
+                    </div>
+                    <div class="margin-container">
+                        <div class="margin-bar">
+                            <div class="margin-fill" style="width: 40%; background: #10b981;"></div> 
+                        </div>
+                        <div class="margin-text" style="color: #10b981;">30% Margin</div>
+                    </div>
+                </div>
+
+                <div class="card-stock-box">
+                    <div class="stock-label">TOTAL STOCK</div>
+                    <div class="stock-number">{{ product.stock_level }}</div>
+                    {% if product.stock_level == 0 %}
+                        <div class="stock-subtext text-muted">Restock expected: --</div>
+                    {% elif product.is_low_stock %}
+                        <div class="stock-subtext text-red">Reorder Level Reached</div>
+                    {% else %}
+                        <div class="stock-subtext text-muted">units across location</div>
+                    {% endif %}
+                </div>
+
+                <div class="card-actions-box">
+                    <button type="button" class="btn-view-details" style="background: #ffffff; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 100%; gap: 6px; transition: 0.2s;"
+                        data-name="{{ product.name|escapejs }}"
+                        data-sku="{{ product.sku|escapejs }}"
+                        data-category="{{ product.category.name|default:'Uncategorized'|escapejs }}"
+                        data-brand="{{ product.brand|default:'N/A'|escapejs }}"
+                        data-mfr="{{ product.manufacturer|default:'N/A'|escapejs }}"
+                        data-weight="{{ product.weight|default:'N/A'|escapejs }}"
+                        data-dim="{{ product.dimensions|default:'N/A'|escapejs }}"
+                        data-cost="{{ product.cost_price|default:'0.00' }}"
+                        data-price="{{ product.price }}"
+                        data-stock="{{ product.stock_level }}"
+                        data-unit="{{ product.unit_type|escapejs }}"
+                        data-image="{{ product.image_url|default:'' }}"
+                        data-lowstock="{{ product.is_low_stock|yesno:'true,false' }}"
+                        onclick="openProductDetails(this)"
+                        onmouseover="this.style.background='#f8fafc'"
+                        onmouseout="this.style.background='#ffffff'">
+                        <i class="fa-regular fa-eye"></i> View Details
+                    </button>
+                    <div class="icon-btn-row">
+                        <a href="{% url 'edit_product' product.id %}{% if current_warehouse %}?warehouse_id={{ current_warehouse.id }}{% endif %}" class="icon-btn" title="Edit Product"><i class="fa-solid fa-pen"></i></a>
+                        <button class="icon-btn delete-btn" title="Delete Product"
+                                onclick="openDeleteModal('{{ product.id }}', '{{ product.name|escapejs }}')"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <i class="fa-solid fa-folder-open"></i>
+                <h3>No products found</h3>
+                {% if search_query %}
+                    <p>No products matched your search for "{{ search_query }}".</p>
+                {% else %}
+                    <p>Your product list is currently empty.</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="pagination-footer" style="margin-top: 20px;">
+            <div class="pagination-info">Showing {% if products %}1{% else %}0{% endif %} to {{ products|length }} of {{ total_products }} products</div>
+            <div class="pagination-controls">
+                <button class="page-btn">Previous</button>
+                <button class="page-btn active-btn">Next</button>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<div class="delete-modal-overlay" id="deleteModal">
+    <div class="delete-modal-card">
+        <div class="delete-modal-icon">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h3>Delete Product</h3>
+        <p>Are you sure you want to delete <strong id="deleteProductName"></strong>? This action cannot be undone.</p>
+        <form id="deleteForm" method="POST">
+            {% csrf_token %}
+            <div class="delete-modal-actions">
+                <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button type="submit" class="btn-modal-delete"><i class="fa-solid fa-trash"></i> Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="productDetailsModal" class="details-modal">
+    <div class="details-modal-content">
+        <div class="details-modal-header">
+            <h3 id="modalProductName">Product Name</h3>
+            <i class="fa-solid fa-xmark close-details" onclick="closeProductDetails()"></i>
+        </div>
+        <div class="details-modal-body">
+            <div class="modal-top-section">
+                <img id="modalProductImage" src="" alt="Product Image">
+                <div class="modal-key-info">
+                    <div id="modalBadges"></div>
+                    <p><strong>SKU:</strong> <span id="modalProductSKU"></span></p>
+                    <p><strong>Category:</strong> <span id="modalProductCategory"></span></p>
+                    <div class="modal-price-stock">
+                        <div class="m-price">
+                            <small>Selling Price</small>
+                            <div id="modalProductPrice">₹0.00</div>
+                        </div>
+                        <div class="m-stock">
+                            <small>Current Stock</small>
+                            <div id="modalProductStock">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-divider"></div>
+            <div class="modal-specs-grid">
+                <div class="spec-item"><small>Brand</small><div id="modalBrand"></div></div>
+                <div class="spec-item"><small>Manufacturer</small><div id="modalMfr"></div></div>
+                <div class="spec-item"><small>Weight</small><div id="modalWeight"></div></div>
+                <div class="spec-item"><small>Dimensions</small><div id="modalDim"></div></div>
+                <div class="spec-item"><small>Cost Price</small><div id="modalCost"></div></div>
+                <div class="spec-item"><small>Unit Type</small><div id="modalUnit"></div></div>
+            </div>
+        </div>
+        <div class="details-modal-footer">
+            <button class="btn-close-modal" onclick="closeProductDetails()">Close Window</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Delete Modal Logic
+    function openDeleteModal(productId, productName) {
+        const modal = document.getElementById('deleteModal');
+        const form = document.getElementById('deleteForm');
+        const nameEl = document.getElementById('deleteProductName');
+
+        nameEl.textContent = productName;
+        form.action = '/admin-console/inventory/delete/' + productId + '/';
+        modal.classList.add('active');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.remove('active');
+    }
+
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeDeleteModal();
+            closeProductDetails();
+        }
+    });
+
+    // View Details Modal Logic
+    function openProductDetails(button) {
+        const data = button.dataset;
+
+        document.getElementById('modalProductName').innerText = data.name;
+        document.getElementById('modalProductSKU').innerText = data.sku;
+        document.getElementById('modalProductCategory').innerText = data.category;
+        document.getElementById('modalBrand').innerText = data.brand;
+        document.getElementById('modalMfr').innerText = data.mfr;
+        document.getElementById('modalWeight').innerText = data.weight;
+        document.getElementById('modalDim').innerText = data.dim;
+        document.getElementById('modalUnit').innerText = data.unit;
+
+        document.getElementById('modalProductPrice').innerText = '₹' + parseFloat(data.price).toFixed(2);
+        document.getElementById('modalCost').innerText = '₹' + parseFloat(data.cost).toFixed(2);
+        document.getElementById('modalProductStock').innerText = data.stock + ' ' + data.unit;
+
+        const imgEl = document.getElementById('modalProductImage');
+        if (data.image && data.image.trim() !== '') {
+            imgEl.src = data.image;
+        } else {
+            imgEl.src = 'https://placehold.co/400x400/e2e8f0/64748b?text=No+Image'; 
+        }
+
+        const badges = document.getElementById('modalBadges');
+        badges.innerHTML = '';
+        if (data.lowstock === 'true') {
+            badges.innerHTML = '<span class="badge-low-stock" style="background:#fef08a; color:#854d0e; font-size:10px; font-weight:700; padding:4px 8px; border-radius:4px; text-transform:uppercase; margin-bottom:8px; display:inline-block;">LOW STOCK WARNING</span>';
+        }
+
+        document.getElementById('productDetailsModal').style.display = 'flex';
+    }
+
+    function closeProductDetails() {
+        document.getElementById('productDetailsModal').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
