@@ -1,0 +1,74 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Stockify</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/edit_profile.css' %}">
+</head>
+<body>
+
+    <nav class="app-nav">
+        <div class="logo">
+            <img src="{% static 'images/cube-logo.png' %}" alt="Logo"> Stockify
+        </div>
+        <a href="{% url 'warehouse_overview' %}" class="back-link">
+            Dashboard <i class="fa-solid fa-arrow-right" style="margin-left: 5px;"></i>
+        </a>
+    </nav>
+
+    <form method="POST" action="" class="master-layout">
+        {% csrf_token %}
+        <div class="form-card">
+            
+            <div class="card-header-wrap">
+                <div class="icon-box blue">
+                    {{ user.username|make_list|first|upper }}
+                </div>
+                <div>
+                    <h2 class="section-title">Profile Settings</h2>
+                    <p class="section-desc">Update your personal and business details here.</p>
+                </div>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="form-group">
+                <label>Username</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" name="username" value="{{ user.username }}" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" name="email" value="{{ user.email }}" required>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 30px;">
+                <label>Business Entity Name</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-building"></i>
+                    <input type="text" name="business_name" value="{{ user.userprofile.business_name }}" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-save">Save Profile Changes</button>
+        </div>
+    </form>
+
+</body>
+</html>

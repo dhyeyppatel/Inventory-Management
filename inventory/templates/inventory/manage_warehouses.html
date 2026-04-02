@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Warehouses - Stockify</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/manage_warehouses.css' %}">
+</head>
+<body>
+
+    <nav class="app-nav">
+        <div class="logo">
+            <img src="{% static 'images/cube-logo.png' %}" alt="Logo"> Stockify
+        </div>
+        <a href="{% url 'warehouse_overview' %}" class="back-link">
+            Dashboard <i class="fa-solid fa-arrow-right" style="margin-left: 5px;"></i>
+        </a>
+    </nav>
+
+    <div class="master-layout">
+        <div class="form-card">
+            
+            <div class="card-header-wrap">
+                <div class="icon-box gray">
+                    <i class="fa-solid fa-warehouse"></i>
+                </div>
+                <div>
+                    <h2 class="section-title">Manage Warehouses</h2>
+                    <p class="section-desc">Add and track your different inventory locations.</p>
+                </div>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <h4 class="list-header">Current Locations</h4>
+            <ul class="item-list">
+                {% for wh in warehouses %}
+                <li class="item-card">
+                    <div>
+                        <i class="fa-solid fa-location-dot" style="color: #2563eb; margin-right: 12px;"></i>
+                        <strong style="color: #0f172a; font-size: 15px;">{{ wh.name }}</strong> 
+                        <span style="color: #64748b; margin-left: 5px; font-size: 14px;">({{ wh.location }})</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        {% if wh.is_default %}
+                            <span class="item-primary-badge">PRIMARY</span>
+                        {% endif %}
+                        
+                        <form method="POST" action="" style="margin: 0;" onsubmit="return confirm('Delete this location? All stock assigned to it will also be removed.');">
+                            {% csrf_token %}
+                            <input type="hidden" name="delete_warehouse_id" value="{{ wh.id }}">
+                            <button type="submit" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 15px; padding: 4px;" title="Delete Warehouse">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </form>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="item-empty">No locations added yet. Add your first warehouse below.</li>
+                {% endfor %}
+            </ul>
+
+            <div class="add-box">
+                <form method="POST" action="">
+                    {% csrf_token %}
+                    <h4 style="font-size: 15px; margin-bottom: 20px; color: #0f172a; font-weight: 700;">Add New Location</h4>
+                    
+                    <div class="flex-row" style="margin-bottom: 20px;">
+                        <div class="form-group flex-1" style="margin-bottom: 0;">
+                            <label>Warehouse Name</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-tag"></i>
+                                <input type="text" name="new_warehouse_name" placeholder="e.g., Downtown Hub" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group flex-1" style="margin-bottom: 0;">
+                            <label>City / Region</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-map-pin"></i>
+                                <input type="text" name="new_warehouse_location" placeholder="e.g., Mumbai, India" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-add"><i class="fa-solid fa-plus" style="margin-right: 5px;"></i> Add Location</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
