@@ -1,0 +1,188 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - Stockify</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{% static 'css/notifications.css' %}">
+</head>
+<body>
+
+    <nav class="dash-nav">
+        <div class="nav-left">
+            <a href="{% url 'warehouse_overview' %}" class="logo">
+                <img src="{% static 'images/cube-logo.png' %}" alt="Logo"> Stockify
+            </a>
+            
+            <div class="location-dropdown" id="locationDropdownBtn">
+                <i class="fa-solid fa-circle"></i> 
+                
+                {% if current_warehouse %}
+                    {{ current_warehouse.name }} <span style="color: #64748b; font-weight: 500; margin-left: 2px;">({{ current_warehouse.location }})</span>
+                {% else %}
+                    No Locations Added
+                {% endif %}
+                
+                <i class="fa-solid fa-chevron-down" style="margin-left: 4px;"></i>
+                
+                <div class="profile-dropdown-menu location-menu" id="locationDropdown">
+                    <div class="dropdown-header">
+                        <strong>Your Locations</strong>
+                        <span>Select to switch inventory view</span>
+                    </div>
+                    <hr>
+                    {% for wh in warehouses %}
+                        <a href="?warehouse_id={{ wh.id }}" class="{% if current_warehouse and current_warehouse.id == wh.id %}active-location{% endif %}">
+                            <i class="fa-solid fa-warehouse"></i> {{ wh.name }} <span style="font-size: 12px; opacity: 0.7; margin-left: 4px;">({{ wh.location }})</span>
+                        </a>
+                    {% empty %}
+                        <span class="empty-location">No locations added.</span>
+                    {% endfor %}
+                    <hr>
+                    <a href="{% url 'manage_warehouses' %}" class="manage-wh-link"><i class="fa-solid fa-plus"></i> Add Locations</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav-right">
+            <a href="{% url 'admin_console' %}" class="btn-admin"><i class="fa-solid fa-shield-halved"></i> Admin Console</a>
+            
+            <div class="user-profile" id="profileDropdownBtn">
+                <div class="avatar">{{ username|make_list|first|upper }}</div>
+                {{ username }} <i class="fa-solid fa-chevron-down" style="color:#94a3b8; font-size:10px;"></i>
+                
+                <div class="profile-dropdown-menu" id="profileDropdown">
+                    <div class="dropdown-header">
+                        <strong>{{ username }}</strong>
+                        <span>{{ request.user.email }}</span>
+                    </div>
+                    <hr>
+                    <a href="{% url 'edit_profile' %}"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
+                    <a href="{% url 'manage_warehouses' %}"><i class="fa-solid fa-warehouse"></i> Manage Warehouses</a>
+                    <a href="{% url 'logout' %}" class="text-red"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="notify-container">
+        <div class="notify-header">
+            <h1>Notifications</h1>
+            <a href="#" class="mark-read">Mark all as read</a>
+        </div>
+
+        <div class="notification-list">
+            
+            {% if low_stock_items %}
+                {% for item in low_stock_items %}
+                <div class="notify-card unread">
+                    <div class="notify-icon icon-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="notify-content">
+                        <h4>Low Stock Alert: {{ item.name }}</h4>
+                        <p>Product <strong>{{ item.sku }}</strong> has dropped to {{ item.stock_level }} {{ item.unit_type }}. Restock recommended to avoid stockouts.</p>
+                        <span class="notify-time">System generated alert</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="notify-card">
+                    <div class="notify-icon icon-success"><i class="fa-solid fa-check"></i></div>
+                    <div class="notify-content">
+                        <h4>Inventory Healthy</h4>
+                        <p>All monitored product stock levels are currently optimal. No action required.</p>
+                        <span class="notify-time">Just now</span>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="notify-card">
+                <div class="notify-icon icon-info"><i class="fa-solid fa-rocket"></i></div>
+                <div class="notify-content">
+                    <h4>Welcome to Stockify Beta!</h4>
+                    <p>Your account has been successfully verified. You now have unrestricted access to all enterprise features during our active beta phase.</p>
+                    <span class="notify-time">System message</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div>
+            <h2 class="footer-brand">
+                <img src="{% static 'images/cube-logo.png' %}" class="footer-logo-img"> Stockify
+            </h2>
+            <p class="footer-desc">Empowering businesses with intelligent inventory solutions. Built for clarity, speed, and growth.</p>
+            <div class="footer-socials">
+                <i class="fa-brands fa-linkedin footer-social-icon"></i>
+                <i class="fa-brands fa-x-twitter footer-social-icon"></i>
+                <i class="fa-brands fa-facebook footer-social-icon"></i>
+            </div>
+        </div>
+        
+        <div>
+            <h4 class="footer-heading">PRODUCT</h4>
+            <div class="footer-links">
+                <a href="{% url 'pricing' %}" class="footer-link">Pricing</a>
+                <a href="{% url 'landing_page' %}#features" class="footer-link">Features</a>
+                <a href="{% url 'roadmap' %}" class="footer-link">Roadmap</a>
+            </div>
+        </div>
+        
+        <div>
+            <h4 class="footer-heading">COMPANY</h4>
+            <div class="footer-links">
+                <a href="{% url 'about' %}" class="footer-link">About Us</a>
+                <a href="{% url 'careers' %}" class="footer-link">Careers</a>
+                <a href="{% url 'contact' %}" class="footer-link">Contact</a>
+            </div>
+        </div>
+        
+        <div>
+            <h4 class="footer-heading">STAY UPDATED</h4>
+            <form class="footer-form">
+                <input type="email" placeholder="Enter your email" class="footer-input">
+                <button type="submit" class="footer-btn">Subscribe</button>
+            </form>
+        </div>
+    </footer>
+
+    <script>
+        const profileBtn = document.getElementById('profileDropdownBtn');
+        const profileMenu = document.getElementById('profileDropdown');
+        
+        const locationBtn = document.getElementById('locationDropdownBtn');
+        const locationMenu = document.getElementById('locationDropdown');
+
+        if (profileBtn) {
+            profileBtn.addEventListener('click', function(e) {
+                profileMenu.classList.toggle('active');
+                if(locationMenu) locationMenu.classList.remove('active'); 
+                e.stopPropagation(); 
+            });
+        }
+
+        if (locationBtn) {
+            locationBtn.addEventListener('click', function(e) {
+                locationMenu.classList.toggle('active');
+                if(profileMenu) profileMenu.classList.remove('active'); 
+                e.stopPropagation(); 
+            });
+        }
+
+        document.addEventListener('click', function(e) {
+            if (profileBtn && !profileBtn.contains(e.target)) {
+                profileMenu.classList.remove('active');
+            }
+            if (locationBtn && !locationBtn.contains(e.target)) {
+                locationMenu.classList.remove('active');
+            }
+        });
+    </script>
+
+</body>
+</html>

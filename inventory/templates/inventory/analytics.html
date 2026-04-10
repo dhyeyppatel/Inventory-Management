@@ -1,0 +1,369 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analytics - Stockify Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/admin_console.css' %}">
+<link rel="stylesheet" href="{% static 'css/analytics.css' %}">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-header">
+                <img src="{% static 'images/cube-logo.png' %}" alt="Logo" style="filter: none;">
+                <div class="sidebar-brand-text">
+                    Stockify
+                    <span>Admin Console</span>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="{% if request.resolver_match.url_name == 'admin_console' %}active{% endif %}">
+                    <a href="{% url 'admin_console' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'inventory' %}active{% endif %}">
+                    <a href="{% url 'inventory' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-box"></i> Inventory</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
+                    <a href="{% url 'product_list' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-list"></i> Product List</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'stock_movement' %}active{% endif %}">
+                    <a href="{% url 'stock_movement' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-arrow-right-arrow-left"></i> Stock Movement</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'suppliers' %}active{% endif %}">
+                    <a href="{% url 'suppliers' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-truck"></i> Suppliers</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
+                    <a href="{% url 'orders' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-cart-shopping"></i> Orders</a>
+                </li>
+                <li class="active">
+                    <a href="{% url 'analytics' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+                </li>
+            </ul>
+        </div>
+        <div class="sidebar-user">
+            <div class="avatar">{{ user.username|make_list|first|upper }}</div>
+            <div style="font-size: 14px; font-weight: 600;">{{ user.username }}</div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="analytics-breadcrumb">
+            Dashboard <i class="fa-solid fa-chevron-right" style="font-size:10px; margin:0 5px;"></i> <span>Analytics</span>
+        </div>
+        <div class="analytics-header">
+            <div>
+                <h1>Analytics Overview</h1>
+                <p>Comprehensive insights into your inventory and sales performance.</p>
+            </div>
+            <button class="btn-export"><i class="fa-solid fa-download"></i> Export Report</button>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-top">
+                    <div class="kpi-title">Total Revenue</div>
+                    <div class="kpi-icon" style="background: #eff6ff; color: #2563eb;"><i class="fa-solid fa-money-bill"></i></div>
+                </div>
+                <div class="kpi-value">{{ total_revenue }}</div>
+                <div class="kpi-trend">
+                    <span class="trend-up"><i class="fa-solid fa-arrow-trend-up"></i> +12.5%</span> 
+                    <span class="trend-text">vs last month</span>
+                </div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-top">
+                    <div class="kpi-title">Total Orders</div>
+                    <div class="kpi-icon" style="background: #fdf4ff; color: #c026d3;"><i class="fa-solid fa-cart-shopping"></i></div>
+                </div>
+                <div class="kpi-value">{{ total_orders }}</div>
+                <div class="kpi-trend">
+                    <span class="trend-up"><i class="fa-solid fa-arrow-trend-up"></i> +8.2%</span> 
+                    <span class="trend-text">vs last month</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-top">
+                    <div class="kpi-title">Inventory Value</div>
+                    <div class="kpi-icon" style="background: #f0fdf4; color: #16a34a;"><i class="fa-solid fa-box"></i></div>
+                </div>
+                <div class="kpi-value">{{ inventory_value }}</div>
+                <div class="kpi-trend">
+                    <span class="trend-down"><i class="fa-solid fa-arrow-trend-down"></i> -2.4%</span> 
+                    <span class="trend-text">vs last month</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-top">
+                    <div class="kpi-title">Low Stock Alerts</div>
+                    <div class="kpi-icon" style="background: #fffbeb; color: #d97706;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                </div>
+                <div class="kpi-value">{{ low_stock_count }}</div>
+                <div class="kpi-trend">
+                    <span class="trend-text">Across {{ low_stock_categories }} categories</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">
+                    <h3>Sales vs Purchases</h3>
+                    <p>Overview of cash flow over the selected period</p>
+                </div>
+                <div class="chart-controls">
+                    <div class="chart-legend">
+                        <span><div class="dot" style="background: #2563eb;"></div> Sales</span>
+                        <span><div class="dot" style="background: #94a3b8;"></div> Purchases</span>
+                    </div>
+                    <select class="chart-select" onchange="window.location.href='?period=' + this.value;">
+                        <option value="7_days" {% if request.GET.period == '7_days' or not request.GET.period %}selected{% endif %}>Last 7 Days</option>
+                        <option value="30_days" {% if request.GET.period == '30_days' %}selected{% endif %}>Last 30 Days</option>
+                        <option value="year" {% if request.GET.period == 'year' %}selected{% endif %}>This Year</option>
+                    </select>
+                </div>
+            </div>
+            <div style="position: relative; height: 300px; width: 100%;">
+                <canvas id="salesLineChart"></canvas>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="chart-card" style="margin-bottom: 0;">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <h3>Top Selling Products</h3>
+                        <p>By units sold or moved this month</p>
+                    </div>
+                </div>
+                <div id="top-products-container">
+                    </div>
+            </div>
+
+            <div class="chart-card" style="margin-bottom: 0;">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <h3>Inventory Distribution</h3>
+                        <p>Value by product category</p>
+                    </div>
+                </div>
+                <div style="position: relative; height: 250px; width: 100%; display: flex; justify-content: center;">
+                    <canvas id="inventoryDonutChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="chart-card" style="margin-bottom: 0;">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <h3>Inventory by Warehouse</h3>
+                        <p>Units vs. stock in units</p>
+                    </div>
+                </div>
+                <div style="position: relative; height: 280px; width: 100%;">
+                    <canvas id="warehouseBarChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card" style="margin-bottom: 0;">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <h3>Supplier Performance</h3>
+                        <p>Top vendors based on ratings</p>
+                    </div>
+                </div>
+                <table class="stat-table">
+                    <thead>
+                        <tr>
+                            <th>Supplier Name</th>
+                            <th>Payment Terms</th>
+                            <th>Rating</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sup in suppliers %}
+                        <tr>
+                            <td style="font-weight: 600;">{{ sup.name }}</td>
+                            <td>{{ sup.payment_terms }}</td>
+                            <td>
+                                <i class="fa-solid fa-star" style="color: #fbbf24; font-size: 11px;"></i> {{ sup.performance_rating }}/5
+                            </td>
+                            <td>
+                                {% if sup.performance_rating >= 4 %}
+                                    <span class="perf-badge perf-exc">Excellent</span>
+                                {% elif sup.performance_rating == 3 %}
+                                    <span class="perf-badge perf-good">Good</span>
+                                {% else %}
+                                    <span class="perf-badge perf-attn">Needs Attention</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #94a3b8;">No suppliers rated yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    // 1. Safely Load Django JSON Data
+    const chartLabels = JSON.parse('{{ chart_labels|escapejs }}');
+    const salesData = JSON.parse('{{ sales_data|escapejs }}');
+    const purchasesData = JSON.parse('{{ purchases_data|escapejs }}');
+    
+    const topProdNames = JSON.parse('{{ top_product_names|escapejs }}');
+    const topProdSales = JSON.parse('{{ top_product_sales|escapejs }}');
+    
+    const catLabels = JSON.parse('{{ category_labels|escapejs }}');
+    const catData = JSON.parse('{{ category_data|escapejs }}');
+    
+    const whLabels = JSON.parse('{{ warehouse_names|escapejs }}');
+    const whData = JSON.parse('{{ warehouse_units|escapejs }}');
+
+    // Chart.js Default styling tweaks
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#6b7280';
+
+    // 2. Render Main Line Chart
+    const ctxLine = document.getElementById('salesLineChart').getContext('2d');
+    
+    // Create a smooth gradient fill for the sales line
+    let gradientBlue = ctxLine.createLinearGradient(0, 0, 0, 400);
+    gradientBlue.addColorStop(0, 'rgba(37, 99, 235, 0.2)');
+    gradientBlue.addColorStop(1, 'rgba(37, 99, 235, 0)');
+
+    new Chart(ctxLine, {
+        type: 'line',
+        data: {
+            labels: chartLabels,
+            datasets: [
+                {
+                    label: 'Sales',
+                    data: salesData,
+                    borderColor: '#2563eb',
+                    backgroundColor: gradientBlue,
+                    borderWidth: 3,
+                    tension: 0.4, // Smooth curves
+                    fill: true,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#2563eb',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
+                },
+                {
+                    label: 'Purchases',
+                    data: purchasesData,
+                    borderColor: '#94a3b8',
+                    borderWidth: 2,
+                    borderDash: [5, 5], // Dashed line for purchases
+                    tension: 0.4,
+                    fill: false,
+                    pointRadius: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }, // We built custom legend
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false } },
+                x: { grid: { display: false, drawBorder: false } }
+            }
+        }
+    });
+
+    // 3. Render Custom Horizontal Bars (Top Products)
+    const topContainer = document.getElementById('top-products-container');
+    if (topProdNames.length > 0) {
+        const maxSales = Math.max(...topProdSales);
+        let html = '';
+        
+        topProdNames.forEach((name, index) => {
+            const sales = topProdSales[index];
+            const widthPct = maxSales > 0 ? (sales / maxSales) * 100 : 0;
+            
+            html += `
+            <div class="custom-bar-row">
+                <div class="custom-bar-label" title="${name}">${name}</div>
+                <div class="custom-bar-track">
+                    <div class="custom-bar-fill" style="width: ${widthPct}%;"></div>
+                </div>
+                <div class="custom-bar-value">${sales}</div>
+            </div>`;
+        });
+        topContainer.innerHTML = html;
+    } else {
+        topContainer.innerHTML = '<p style="color: #94a3b8; font-size: 13px;">No product movement data available yet.</p>';
+    }
+
+    // 4. Render Donut Chart (Categories)
+    const ctxDonut = document.getElementById('inventoryDonutChart').getContext('2d');
+    new Chart(ctxDonut, {
+        type: 'doughnut',
+        data: {
+            labels: catLabels,
+            datasets: [{
+                data: catData,
+                backgroundColor: ['#2563eb', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#64748b'],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '75%', // Makes the donut thinner
+            plugins: {
+                legend: { position: 'right', labels: { boxWidth: 10, usePointStyle: true, padding: 15 } }
+            }
+        }
+    });
+
+    // 5. Render Warehouse Bar Chart
+    const ctxBar = document.getElementById('warehouseBarChart').getContext('2d');
+    new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: whLabels,
+            datasets: [{
+                label: 'Total Units',
+                data: whData,
+                backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'],
+                borderRadius: 6, // Rounded top corners
+                borderSkipped: false,
+                barThickness: 30
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false } },
+                x: { grid: { display: false, drawBorder: false } }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
