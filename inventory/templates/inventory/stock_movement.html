@@ -1,0 +1,275 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock Movement - Stockify Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/admin_console.css' %}">
+<link rel="stylesheet" href="{% static 'css/stock_movement.css' %}">
+</head>
+<body>
+
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-header">
+                <img src="{% static 'images/cube-logo.png' %}" alt="Logo" style="filter: none;">
+                <div class="sidebar-brand-text">
+                    Stockify
+                    <span>Admin Console</span>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="{% if request.resolver_match.url_name == 'admin_console' %}active{% endif %}">
+                    <a href="{% url 'admin_console' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'inventory' %}active{% endif %}">
+                    <a href="{% url 'inventory' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-box"></i> Inventory</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
+                    <a href="{% url 'product_list' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-list"></i> Product List</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'stock_movement' %}active{% endif %}">
+                    <a href="{% url 'stock_movement' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-arrow-right-arrow-left"></i> Stock Movement</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'suppliers' %}active{% endif %}">
+                    <a href="{% url 'suppliers' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-truck"></i> Suppliers</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
+                    <a href="{% url 'orders' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-cart-shopping"></i> Orders</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+                    <a href="{% url 'analytics' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+                </li>
+            </ul>
+        </div>
+        <div class="sidebar-user">
+            <div class="avatar">{{ user.username|make_list|first|upper }}</div>
+            <div style="font-size: 14px; font-weight: 600;">{{ user.username }}</div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="header-row">
+            <div class="header-titles">
+                <div class="breadcrumbs">Inventory <i class="fa-solid fa-chevron-right"></i> <b>Stock Movement</b></div>
+                <div class="page-title">Stock Movement</div>
+                <p class="page-subtitle">Initiate and track transfers between warehouses.</p>
+            </div>
+        </div>
+
+        {% if messages %}
+        <div style="margin-bottom: 25px;">
+            {% for message in messages %}
+            <div style="padding: 15px; border-radius: 8px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 10px;
+                {% if message.tags == 'success' %}background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;
+                {% elif message.tags == 'error' %}background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;
+                {% else %}background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;{% endif %}">
+                <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% elif message.tags == 'error' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'stock_movement' %}">
+            {% csrf_token %}
+            <div class="transfer-grid">
+                
+                <div class="transfer-card">
+                    <div class="transfer-header">
+                        <div class="icon-box icon-blue"><i class="fa-solid fa-arrow-right-from-bracket"></i></div>
+                        <div class="header-text">
+                            <h3>Source Warehouse</h3>
+                            <p>Where items are moving from</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Warehouse</label>
+                        <select class="custom-select" name="source_warehouse" id="source-warehouse-select" required>
+                            <option value="" disabled selected>Select origin...</option>
+                            {% for wh in warehouses %}
+                                <option value="{{ wh.id }}">{{ wh.name }} ({{ wh.location }})</option>
+                            {% empty %}
+                                <option disabled>No locations available</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Product</label>
+                        <select class="custom-select" name="product" id="product-select" required disabled>
+                            <option value="" disabled selected>Select origin warehouse first...</option>
+                        </select>
+                    </div>
+
+                    <div class="current-stock-row">
+                        <span class="stock-label">Available Stock:</span>
+                        <span class="stock-value" id="available-stock-display">--</span>
+                    </div>
+                </div>
+
+                <div class="transfer-card">
+                    <div class="transfer-header">
+                        <div class="icon-box icon-green"><i class="fa-solid fa-arrow-right-to-bracket"></i></div>
+                        <div class="header-text">
+                            <h3>Destination Warehouse</h3>
+                            <p>Where items are moving to</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Warehouse</label>
+                        <select class="custom-select" name="destination_warehouse" required>
+                            <option value="" disabled selected>Select destination...</option>
+                            {% for wh in warehouses %}
+                                <option value="{{ wh.id }}">{{ wh.name }} ({{ wh.location }})</option>
+                            {% empty %}
+                                <option disabled>No locations available</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="split-inputs">
+                        <div class="form-group">
+                            <label>Quantity to Move</label>
+                            <input type="number" name="quantity" class="custom-input" placeholder="0" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Reference ID (Optional)</label>
+                            <input type="text" name="reference_id" class="custom-input" placeholder="#TRF-0000">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-confirm-transfer">
+                        <i class="fa-solid fa-arrow-right-arrow-left"></i> Confirm Transfer
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <div class="history-section">
+            <h3 class="section-title">Transfer History</h3>
+            
+            <div class="table-responsive">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>REFERENCE</th>
+                            <th>DATE</th>
+                            <th>PRODUCT</th>
+                            <th>ROUTE</th>
+                            <th>QTY</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transfer in transfers %}
+                        <tr>
+                            <td class="text-muted">{{ transfer.reference_id }}</td>
+                            <td class="date-text">{{ transfer.date|date:"M d, Y" }}</td>
+                            <td>
+                                <div class="product-cell">
+                                    {% if transfer.product.image_url %}
+                                        <img src="{{ transfer.product.image_url }}" alt="Product" style="width:32px; height:32px; border-radius:8px; object-fit:cover;">
+                                    {% else %}
+                                        <div class="product-thumb" style="background:#f1f5f9; color:#64748b;"><i class="fa-solid fa-box"></i></div>
+                                    {% endif %}
+                                    <span class="product-name">{{ transfer.product.name }}</span>
+                                </div>
+                            </td>
+                            <td class="route-cell">{{ transfer.source_warehouse.name }} <i class="fa-solid fa-arrow-right"></i> {{ transfer.destination_warehouse.name }}</td>
+                            <td class="qty-text">{{ transfer.quantity }}</td>
+                            <td>
+                                {% if transfer.status == 'COMPLETED' %}
+                                    <span class="status-badge badge-completed"><i class="fa-solid fa-circle"></i> COMPLETED</span>
+                                {% elif transfer.status == 'IN TRANSIT' %}
+                                    <span class="status-badge badge-transit"><i class="fa-solid fa-circle"></i> IN TRANSIT</span>
+                                {% else %}
+                                    <span class="status-badge" style="background:#f1f5f9; color:#64748b;"><i class="fa-solid fa-circle"></i> {{ transfer.status }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
+                                <i class="fa-solid fa-arrow-right-arrow-left" style="font-size: 24px; margin-bottom: 10px; color: #cbd5e1;"></i>
+                                <br>No transfer history found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    // 1. Pass all products from Django into a Javascript array safely
+    const allProducts = [
+        {% for p in products %}
+        {
+            id: "{{ p.id }}",
+            name: "{{ p.name|escapejs }}",
+            sku: "{{ p.sku|escapejs }}",
+            warehouse_id: "{{ p.warehouse.id|default_if_none:'' }}",
+            stock: {{ p.stock_level }}
+        },
+        {% endfor %}
+    ];
+
+    const sourceSelect = document.getElementById('source-warehouse-select');
+    const productSelect = document.getElementById('product-select');
+    const stockDisplay = document.getElementById('available-stock-display');
+
+    // 2. When Source Warehouse changes, filter the Product dropdown
+    sourceSelect.addEventListener('change', function() {
+        const selectedWarehouseId = this.value;
+        
+        // Clear existing options
+        productSelect.innerHTML = '<option value="" disabled selected>Select a product...</option>';
+        stockDisplay.innerText = '--';
+        
+        // Find products belonging to this warehouse
+        const availableProducts = allProducts.filter(p => p.warehouse_id === selectedWarehouseId);
+        
+        if (availableProducts.length > 0) {
+            productSelect.disabled = false;
+            availableProducts.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.id;
+                option.textContent = `${p.name} (${p.sku})`;
+                productSelect.appendChild(option);
+            });
+        } else {
+            productSelect.disabled = true;
+            productSelect.innerHTML = '<option value="" disabled selected>No products in this warehouse</option>';
+        }
+    });
+
+    // 3. When Product changes, update the Stock Display
+    productSelect.addEventListener('change', function() {
+        const selectedProductId = this.value;
+        const product = allProducts.find(p => p.id === selectedProductId);
+        
+        if (product) {
+            stockDisplay.innerText = `${product.stock} Units`;
+            
+            // Add a little visual warning if stock is 0
+            if (product.stock === 0) {
+                stockDisplay.style.color = '#ef4444';
+            } else {
+                stockDisplay.style.color = '#0f172a';
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

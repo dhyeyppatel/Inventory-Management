@@ -1,0 +1,190 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Supplier - Stockify</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/admin_console.css' %}">
+    <link rel="stylesheet" href="{% static 'css/add_supplier_form.css' %}">
+</head>
+<body>
+
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-header">
+                <img src="{% static 'images/cube-logo.png' %}" alt="Logo" style="filter: none;">
+                <div class="sidebar-brand-text">
+                    Stockify
+                    <span>Admin Console</span>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="{% if request.resolver_match.url_name == 'admin_console' %}active{% endif %}">
+                    <a href="{% url 'admin_console' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'inventory' %}active{% endif %}">
+                    <a href="{% url 'inventory' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-box"></i> Inventory</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
+                    <a href="{% url 'product_list' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-list"></i> Product List</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'stock_movement' %}active{% endif %}">
+                    <a href="{% url 'stock_movement' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-arrow-right-arrow-left"></i> Stock Movement</a>
+                </li>
+                <li class="active">
+                    <a href="{% url 'suppliers' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-truck"></i> Suppliers</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
+                    <a href="{% url 'orders' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-cart-shopping"></i> Orders</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+                    <a href="{% url 'analytics' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+                </li>
+            </ul>
+        </div>
+        <div class="sidebar-user">
+            <div class="avatar">{{ user.username|make_list|first|upper }}</div>
+            <div style="font-size: 14px; font-weight: 600;">{{ user.username }}</div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <form method="POST" action="{% url 'add_supplier' %}">
+            {% csrf_token %}
+            
+            <div class="form-header-row">
+                <div class="header-left">
+                    <div class="breadcrumbs">Suppliers <i class="fa-solid fa-chevron-right"></i> <b>Add New Supplier</b></div>
+                    <h1 class="page-title">Add New Supplier</h1>
+                </div>
+                <div class="header-actions">
+                    <a href="{% url 'suppliers' %}" class="btn-cancel-top">Cancel</a>
+                    <button type="submit" class="btn-save-top">Save Supplier</button>
+                </div>
+            </div>
+
+            <div class="form-container-wrapper">
+                
+                <div class="form-section-card">
+                    <div class="section-label"><i class="fa-solid fa-circle-info"></i> Basic Information</div>
+                    <div class="form-grid-3">
+                        <div class="form-input-group">
+                            <label>Supplier Name</label>
+                            {{ form.name }}
+                        </div>
+                        <div class="form-input-group">
+                            <label>Contact Person</label>
+                            {{ form.contact_person }}
+                        </div>
+                        <div class="form-input-group">
+                            <label>Category</label>
+                            {{ form.category }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section-card">
+                    <div class="section-label"><i class="fa-solid fa-address-book"></i> Contact Details</div>
+                    <div class="form-grid-3">
+                        <div class="form-input-group">
+                            <label>Phone Number</label>
+                            <div class="phone-input-wrapper">
+                                <span class="prefix">+91</span>
+                                {{ form.phone }}
+                            </div>
+                        </div>
+                        <div class="form-input-group">
+                            <label>Email Address</label>
+                            {{ form.email }}
+                        </div>
+                        <div class="form-input-group">
+                            <label>Website <span>(Optional)</span></label>
+                            {{ form.website }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section-card">
+                    <div class="section-label"><i class="fa-solid fa-location-dot"></i> Location Details</div>
+                    <div class="form-grid-full">
+                        <div class="form-input-group">
+                            <label>Street Address</label>
+                            {{ form.street_address }}
+                        </div>
+                    </div>
+                    <div class="form-grid-3 mt-20">
+                        <div class="form-input-group">
+                            <label>City</label>
+                            {{ form.city }}
+                        </div>
+                        <div class="form-input-group">
+                            <label>State</label>
+                            {{ form.state }}
+                        </div>
+                        <div class="form-input-group">
+                            <label>PIN Code</label>
+                            {{ form.pin_code }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section-card">
+                    <div class="section-label"><i class="fa-solid fa-shield-check"></i> Performance & Terms</div>
+                    <div class="form-grid-split">
+                        <div class="form-input-group">
+                            <label>Initial Performance Rating</label>
+                            <div class="star-rating" id="star-rating">
+                                <i class="fa-solid fa-star active" data-value="1"></i>
+                                <i class="fa-solid fa-star active" data-value="2"></i>
+                                <i class="fa-solid fa-star active" data-value="3"></i>
+                                <i class="fa-solid fa-star" data-value="4"></i>
+                                <i class="fa-solid fa-star" data-value="5"></i>
+                            </div>
+                            <input type="hidden" name="performance_rating" id="rating-input" value="3">
+                            <p class="helper-text">A preliminary rating based on initial assessment.</p>
+                        </div>
+                        <div class="form-input-group">
+                            <label>Payment Terms</label>
+                            {{ form.payment_terms }}
+                            <p class="helper-text">Standard credit days allowed by the supplier.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-footer-actions">
+                    <a href="{% url 'suppliers' %}" class="btn-cancel-bottom">Cancel</a>
+                    <button type="submit" class="btn-save-bottom">Save Supplier</button>
+                </div>
+
+            </div>
+        </form>
+    </main>
+</div>
+
+<script>
+    const stars = document.querySelectorAll('#star-rating i');
+    const ratingInput = document.getElementById('rating-input');
+
+    if(ratingInput) {
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                const val = star.getAttribute('data-value');
+                ratingInput.value = val;
+                
+                stars.forEach(s => {
+                    if (parseInt(s.getAttribute('data-value')) <= parseInt(val)) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+            });
+        });
+    }
+</script>
+</body>
+</html>
