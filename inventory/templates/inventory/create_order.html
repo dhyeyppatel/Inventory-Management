@@ -1,0 +1,303 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create New Order - Stockify</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/admin_console.css' %}">
+<link rel="stylesheet" href="{% static 'css/create_order.css' %}">
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<style>
+    .scanner-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(17, 24, 39, 0.7);
+        display: none; 
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .scanner-modal-content {
+        background: #ffffff;
+        width: 450px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .scanner-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .scanner-header h3 {
+        margin: 0;
+        font-size: 16px;
+        color: #111827;
+    }
+
+    .close-scanner {
+        cursor: pointer;
+        color: #6b7280;
+        font-size: 18px;
+        transition: color 0.2s;
+    }
+
+    .close-scanner:hover {
+        color: #dc2626;
+    }
+
+    .scanner-body {
+        padding: 32px 24px;
+        text-align: center;
+    }
+
+    #qr-reader {
+        width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 16px;
+        border: 1px solid #e5e7eb;
+        background-color: #000;
+    }
+</style>
+
+</head>
+<body>
+
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-header">
+                <img src="{% static 'images/cube-logo.png' %}" alt="Logo" style="filter: none;">
+                <div class="sidebar-brand-text">Stockify <span>Admin Console</span></div>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="{% url 'admin_console' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a></li>
+                <li><a href="{% url 'inventory' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-box"></i> Inventory</a></li>
+                <li><a href="{% url 'product_list' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-list"></i> Product List</a></li>
+                <li><a href="{% url 'stock_movement' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-arrow-right-arrow-left"></i> Stock Movement</a></li>
+                <li><a href="{% url 'suppliers' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-truck"></i> Suppliers</a></li>
+                <li class="active"><a href="{% url 'orders' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-cart-shopping"></i> Orders</a></li>
+                <li><a href="{% url 'analytics' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-chart-pie"></i> Analytics</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-user">
+            <div class="avatar">{{ request.user.username|make_list|first|upper|default:"A" }}</div>
+            <div style="font-size: 14px; font-weight: 600;">{{ request.user.username|default:"Admin" }}</div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="co-breadcrumb">
+            Console <i class="fa-solid fa-chevron-right" style="margin: 0 4px; font-size: 10px;"></i> Orders <i class="fa-solid fa-chevron-right" style="margin: 0 4px; font-size: 10px;"></i> <span>Create New Order</span>
+        </div>
+        <h1 class="co-page-title">Create New Order</h1>
+
+        <input type="hidden" id="current_warehouse_id" value="{{ current_warehouse.id }}">
+
+        <form method="POST" action="" id="create-order-form">
+            {% csrf_token %}
+            <input type="hidden" name="order_items" id="order_items_input">
+            
+            <div class="co-grid">
+                <div class="co-left-col">
+                    <div class="co-card">
+                        <div class="co-card-header"><i class="fa-solid fa-circle-info co-icon"></i> Order Information</div>
+                        <div class="co-form-row">
+                            <div class="co-form-group"><label>Order Date</label><input type="date" class="co-input" name="order_date" required></div>
+                            <div class="co-form-group"><label>Expected Delivery</label><input type="date" class="co-input" name="expected_delivery"></div>
+                            <div class="co-form-group"><label>Order Type</label><select class="co-input" name="order_type"><option value="PURCHASE">Purchase Order</option><option value="SALES">Sales Order</option></select></div>
+                        </div>
+                    </div>
+
+                    <div class="co-card">
+                        <div class="co-card-header"><i class="fa-solid fa-user co-icon"></i> Client / Supplier Details</div>
+                        <div class="co-form-group">
+                            <label>Select Vendor or Client</label>
+                            <select class="co-input" name="vendor" required>
+                                <option value="" disabled selected>Select a vendor...</option>
+                                {% for supplier in suppliers %}
+                                    <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="co-card">
+                        <div class="co-card-header"><i class="fa-solid fa-clipboard-list co-icon"></i> Product Selection</div>
+                        <div class="co-product-actions">
+                            <div class="co-action-block">
+                                <div class="co-action-title"><div class="co-action-icon"><i class="fa-solid fa-search"></i></div> Add Product by SKU</div>
+                                <div class="co-search-group">
+                                    <input type="text" id="product-search" class="co-input" placeholder="Type SKU...">
+                                    <button type="button" id="btn-add-product" class="co-btn-add">Fetch</button>
+                                </div>
+                                <div id="fetch-error-msg" style="color: #dc2626; font-size: 12px; margin-top: 8px; display: none;">Product not found.</div>
+                            </div>
+                            <div class="co-divider"><div class="co-divider-line"></div><div class="co-divider-text">OR</div><div class="co-divider-line"></div></div>
+                            <div class="co-action-block">
+                                <div class="co-action-title"><div class="co-action-icon"><i class="fa-solid fa-camera"></i></div> Scan Barcode</div>
+                                <button type="button" class="co-btn-scanner"><i class="fa-solid fa-expand"></i> LAUNCH SCANNER</button>
+                            </div>
+                        </div>
+
+                        <table class="co-table">
+                            <thead><tr><th>Product Name</th><th>SKU</th><th>Quantity</th><th>Unit Price</th><th>Total</th><th style="text-align: center;">Action</th></tr></thead>
+                            <tbody id="order-table-body"></tbody>
+                        </table>
+                        <div id="empty-table-msg" class="co-table-empty">Add products using the methods above.</div>
+                    </div>
+                </div>
+
+                <div class="co-right-col">
+                    <div class="co-card">
+                        <div class="co-card-header">Order Summary</div>
+                        <div class="co-summary-row"><span>Subtotal</span><span id="summary-subtotal">₹ 0.00</span></div>
+                        <div class="co-summary-row"><span>GST (18%)</span><span id="summary-gst">₹ 0.00</span></div>
+                        <div class="co-summary-divider"></div>
+                        <div class="co-total-label">Total Amount</div>
+                        <div class="co-total-row"><span id="summary-total" class="co-total-amount">₹ 0.00</span></div>
+                        <div class="co-form-group"><label>Note / Remarks</label><textarea class="co-textarea" name="remarks"></textarea></div>
+                        <button type="submit" class="co-btn-finalize"><i class="fa-solid fa-circle-check"></i> FINALIZE ORDER</button>
+                        <a href="{% url 'orders' %}" class="co-btn-cancel"><i class="fa-solid fa-xmark"></i> CANCEL</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+</div>
+
+<div id="scanner-modal" class="scanner-modal">
+    <div class="scanner-modal-content">
+        <div class="scanner-header"><h3>Scan Barcode</h3><i class="fa-solid fa-xmark close-scanner" id="close-scanner"></i></div>
+        <div class="scanner-body">
+            <div id="qr-reader"></div>
+            <p style="font-size: 14px; color: #6b7280; margin-top: 10px;">Align the barcode inside the target box.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    let orderItems = [];
+    const GST_RATE = 0.18;
+    const tableBody = document.getElementById('order-table-body');
+    const emptyMsg = document.getElementById('empty-table-msg');
+    const searchInput = document.getElementById('product-search');
+    const addBtn = document.getElementById('btn-add-product');
+    const errorMsg = document.getElementById('fetch-error-msg');
+    const warehouseId = document.getElementById('current_warehouse_id').value;
+
+    const elSubtotal = document.getElementById('summary-subtotal');
+    const elGst = document.getElementById('summary-gst');
+    const elTotal = document.getElementById('summary-total');
+
+    function fetchProductFromDatabase(scannedCode) {
+        if (!scannedCode || !warehouseId) return;
+        errorMsg.style.display = 'none';
+
+        const existingIdx = orderItems.findIndex(item => item.sku === scannedCode);
+        if (existingIdx !== -1) {
+            orderItems[existingIdx].qty += 1;
+            renderTable();
+            return;
+        }
+
+        fetch(`/api/get-product/?sku=${scannedCode}&warehouse_id=${warehouseId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.product) {
+                    orderItems.push({ id: Date.now(), name: data.product.name, sku: data.product.sku, price: data.product.price, qty: 1 });
+                    renderTable();
+                } else {
+                    errorMsg.innerText = data.error || "Product not found.";
+                    errorMsg.style.display = 'block';
+                    setTimeout(() => { errorMsg.style.display = 'none'; }, 3000);
+                }
+            }).catch(err => console.error('Fetch Error:', err));
+    }
+
+    addBtn.addEventListener('click', () => { fetchProductFromDatabase(searchInput.value.trim()); searchInput.value = ''; });
+
+    const scannerBtn = document.querySelector('.co-btn-scanner');
+    const scannerModal = document.getElementById('scanner-modal');
+    const closeScannerBtn = document.getElementById('close-scanner');
+    let html5QrCode;
+
+    scannerBtn.addEventListener('click', function() {
+        scannerModal.style.display = 'flex';
+        html5QrCode = new Html5Qrcode("qr-reader");
+        
+        const config = { 
+            fps: 10, 
+            qrbox: { width: 300, height: 150 }, // Re-added targeting box for focus
+            experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+        };
+
+        html5QrCode.start(
+            { facingMode: "environment" }, 
+            config,
+            (decodedText) => {
+                fetchProductFromDatabase(decodedText.trim());
+                new Audio('https://actions.google.com/sounds/v1/ui/button_click.ogg').play().catch(()=>{}); 
+                html5QrCode.stop().then(() => { scannerModal.style.display = 'none'; });
+            },
+            (errorMessage) => { /* scanning... */ }
+        ).catch((err) => {
+            alert("Camera access denied or error.");
+            scannerModal.style.display = 'none';
+        });
+    });
+
+    closeScannerBtn.addEventListener('click', () => {
+        if (html5QrCode) html5QrCode.stop().finally(() => scannerModal.style.display = 'none');
+        else scannerModal.style.display = 'none';
+    });
+
+    function renderTable() {
+        tableBody.innerHTML = ''; 
+        if (orderItems.length === 0) emptyMsg.style.display = 'block';
+        else {
+            emptyMsg.style.display = 'none';
+            orderItems.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${item.name}</td><td>${item.sku}</td>
+                    <td><input type="number" min="1" value="${item.qty}" class="co-input" style="width: 70px" onchange="updateQty(${index}, this.value)"></td>
+                    <td>₹${item.price.toFixed(2)}</td><td>₹${(item.price * item.qty).toFixed(2)}</td>
+                    <td style="text-align: center;"><i class="fa-solid fa-trash" style="color: #dc2626; cursor: pointer;" onclick="removeItem(${index})"></i></td>`;
+                tableBody.appendChild(tr);
+            });
+        }
+        calculateSummary();
+    }
+
+    window.updateQty = (index, newQty) => { orderItems[index].qty = parseInt(newQty) || 1; renderTable(); };
+    window.removeItem = (index) => { orderItems.splice(index, 1); renderTable(); };
+
+    function calculateSummary() {
+        let subtotal = orderItems.reduce((acc, item) => acc + (item.price * item.qty), 0);
+        let gst = subtotal * GST_RATE;
+        elSubtotal.innerText = '₹ ' + subtotal.toLocaleString('en-IN', {minimumFractionDigits: 2});
+        elGst.innerText = '₹ ' + gst.toLocaleString('en-IN', {minimumFractionDigits: 2});
+        elTotal.innerText = '₹ ' + (subtotal + gst).toLocaleString('en-IN', {minimumFractionDigits: 2});
+    }
+
+    document.getElementById('create-order-form').addEventListener('submit', (e) => {
+        if (orderItems.length === 0) { e.preventDefault(); alert("Please add products first."); return; }
+        document.getElementById('order_items_input').value = JSON.stringify(orderItems);
+    });
+</script>
+</body>
+</html>
