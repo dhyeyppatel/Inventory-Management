@@ -1,0 +1,39 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/footer.css' %}">
+
+<footer class="footer">
+    <div>
+        <a href="{% url 'landing_page' %}" class="footer-logo">
+            <img src="{% static 'images/cube-logo.png' %}" alt="Stockify Logo">
+            Stockify
+        </a>
+        <p>Empowering businesses with intelligent inventory solutions. Built for clarity, speed, and growth.</p>
+        <div class="social">
+            <i class="fa-brands fa-linkedin"></i>
+            <i class="fa-brands fa-x-twitter"></i>
+            <i class="fa-brands fa-facebook"></i>
+        </div>
+    </div>
+
+    <div>
+        <h5>PRODUCT</h5>
+        <a href="{% url 'pricing' %}">Pricing</a>
+        <a href="{% url 'landing_page' %}#features">Features</a>
+        <a href="{% url 'roadmap' %}">Roadmap</a>
+    </div>
+
+    <div>
+        <h5>COMPANY</h5>
+        <a href="{% url 'about' %}">About Us</a>
+        <a href="{% url 'careers' %}">Careers</a>
+        <a href="{% url 'contact' %}">Contact</a>
+    </div>
+
+    <div>
+        <h5>STAY UPDATED</h5>
+        <div class="subscribe">
+            <input type="email" placeholder="Enter your email">
+            <button>Subscribe</button>
+        </div>
+    </div>
+</footer>

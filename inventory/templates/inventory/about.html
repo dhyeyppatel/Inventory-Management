@@ -1,0 +1,74 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stockify - About Us</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link rel="stylesheet" href="{% static 'css/about.css' %}">
+<link rel="stylesheet" href="{% static 'css/footer.css' %}">
+</head>
+<body>
+
+<div class="navbar">
+<a href="{% url 'landing_page' %}" class="logo">
+<img src="{% static 'images/cube-logo.png' %}" alt="Stockify Logo">
+Stockify
+</a>
+<a class="login-btn" href="{% url 'login' %}">Login</a>
+</div>
+
+<section class="header">
+<h1>Simplifying Inventory for the
+
+
+<span class="blue-text">Modern World</span></h1>
+<p>Empowering businesses to track, manage, and scale their operations with unparalleled precision and clarity.</p>
+</section>
+
+<section class="origins">
+<div class="origins-text">
+<h2>Our Origins</h2>
+<p>Stockify started with a simple mission: to remove the chaos from inventory management. We noticed that businesses of all sizes were struggling with outdated spreadsheets and clunky legacy software that slowed them down instead of speeding them up.</p>
+<p>We believe that clarity in your warehouse leads to clarity in your business growth. From humble beginnings in a small garage, we now empower thousands of businesses globally to take control of their stock and focus on what really matters—their customers.</p>
+</div>
+<div class="origins-image">
+<img src="{% static 'images/about-laptop.jpg' %}" alt="Stockify on Laptop" onerror="this.style.display='none'; this.parentNode.innerHTML='[ Place your laptop image in static/images/about-laptop.jpg ]';">
+</div>
+</section>
+
+<section class="values">
+<h2>Our Core Values</h2>
+<p>The principles that guide every feature we build and every decision we make.</p>
+
+<div class="values-grid">
+<div class="value-card">
+<div class="value-icon icon-blue"><i class="fa-solid fa-crosshairs"></i></div>
+<h3>Precision</h3>
+<p>Data you can trust, down to the last unit. We obsess over accuracy so you never have to second-guess your inventory levels.</p>
+</div>
+
+<div class="value-card">
+<div class="value-icon icon-green"><i class="fa-solid fa-bolt"></i></div>
+<h3>Efficiency</h3>
+<p>Streamlined workflows that save you time and money. We automate the mundane so your team can focus on high-value tasks.</p>
+</div>
+
+<div class="value-card">
+<div class="value-icon icon-purple"><i class="fa-solid fa-robot"></i></div>
+<h3>Innovation</h3>
+<p>Always evolving with the latest technology. By leveraging modern technology and real-time tracking, we keep you ahead of the curve.</p>
+</div>
+</div>
+</section>
+
+{% include 'inventory/footer.html' %}
+
+</body>
+</html>

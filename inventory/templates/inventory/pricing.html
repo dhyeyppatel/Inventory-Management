@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - Stockify</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{% static 'css/pricing.css' %}">
+</head>
+<body>
+
+    <nav class="app-nav">
+        <a href="{% url 'landing_page' %}" class="logo">
+            <img src="{% static 'images/cube-logo.png' %}" alt="Logo"> Stockify
+        </a>
+        <div class="nav-links">
+            <a href="{% url 'login' %}" class="btn-primary">Login</a>
+        </div>
+    </nav>
+
+    <div class="pricing-container">
+        <div class="pricing-card">
+            <div class="beta-badge">Open Beta Phase</div>
+            
+            <h1>Enterprise Features.<br><span>Zero Cost.</span></h1>
+            
+            <p>
+                Stockify is currently in active beta testing. As an early adopter, you get unrestricted access to our entire platform—including real-time tracking, smart analytics, and multi-location management—at absolutely no cost while we refine the system.
+            </p>
+
+            <a href="{% url 'register' %}" class="cta-button">Create Your Free Account</a>
+        </div>
+    </div>
+
+    {% include 'inventory/footer.html' %}
+
+</body>
+</html>
