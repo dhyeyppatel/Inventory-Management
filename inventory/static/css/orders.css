@@ -1,0 +1,108 @@
+/* static/css/orders.css */
+
+/* Main Content Area */
+.main-content {
+    flex: 1;
+    padding: 32px;
+    background-color: #f9fafb;
+    overflow-y: auto;
+}
+
+/* Header & Breadcrumbs */
+.orders-breadcrumb {
+    font-size: 13px; color: #6b7280; margin-bottom: 12px;
+}
+.orders-breadcrumb span { color: #111827; font-weight: 600; }
+
+.orders-header {
+    display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;
+}
+.orders-header h1 { font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 4px 0; }
+.orders-header p { font-size: 14px; color: #6b7280; margin: 0; }
+
+/* Buttons */
+.orders-actions { display: flex; gap: 12px; }
+.o-btn {
+    padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 500;
+    border: none; cursor: pointer; display: flex; align-items: center; gap: 8px;
+    font-family: inherit; transition: 0.2s; text-decoration: none;
+}
+.o-btn-outline { background: white; border: 1px solid #e5e7eb; color: #374151; }
+.o-btn-outline:hover { background: #f3f4f6; }
+.o-btn-primary { background: #2563eb; color: white; }
+.o-btn-primary:hover { background: #1d4ed8; }
+
+/* Filters Bar */
+.orders-filters {
+    display: flex; gap: 16px; background: white; padding: 16px; border-radius: 12px;
+    border: 1px solid #e5e7eb; margin-bottom: 24px; align-items: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.o-search { flex: 1; position: relative; display: flex; align-items: center; }
+.o-search i { position: absolute; left: 16px; color: #9ca3af; }
+.o-search input {
+    width: 100%; padding: 10px 16px 10px 40px; border: 1px solid #e5e7eb;
+    border-radius: 8px; outline: none; font-family: inherit; font-size: 14px;
+}
+.o-search input:focus { border-color: #2563eb; }
+.o-select {
+    padding: 10px 16px; border: 1px solid #e5e7eb; border-radius: 8px;
+    background: white; font-size: 14px; color: #374151; outline: none;
+    cursor: pointer; font-family: inherit; min-width: 140px;
+}
+
+/* Table Card */
+.orders-table-card {
+    background: white; border-radius: 12px; border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05); overflow: hidden;
+}
+.orders-table-card table { width: 100%; border-collapse: collapse; text-align: left; }
+.orders-table-card th {
+    background: #f9fafb; padding: 16px; font-size: 11px; text-transform: uppercase;
+    color: #6b7280; font-weight: 600; border-bottom: 1px solid #e5e7eb; letter-spacing: 0.05em;
+}
+.orders-table-card td {
+    padding: 16px; font-size: 14px; border-bottom: 1px solid #f3f4f6; color: #4b5563; vertical-align: middle;
+}
+.orders-table-card tr:hover td { background: #f9fafb; }
+
+/* Table Specific Elements */
+.o-id { font-weight: 600; color: #111827; }
+.o-customer { display: flex; align-items: center; gap: 10px; }
+.o-customer span { font-weight: 500; color: #111827; }
+.o-avatar { 
+    width: 32px; height: 32px; border-radius: 50%; display: flex; 
+    align-items: center; justify-content: center; font-size: 11px; font-weight: 700; 
+}
+.o-type { font-size: 12px; font-weight: 600; letter-spacing: 0.05em; color: #6b7280; text-transform: uppercase; }
+.o-total { font-weight: 700; color: #111827; }
+
+/* Status & Payment Badges */
+.o-status { padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; display: inline-block; text-align: center; min-width: 85px;}
+.st-shipped { background: #f5f3ff; color: #7c3aed; border: 1px solid #ede9fe; }
+.st-delivered { background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; }
+.st-processing { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; }
+
+.o-pay { font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 6px; }
+.pay-paid { color: #16a34a; }
+.pay-pending { color: #ea580c; }
+.pay-overdue { color: #dc2626; }
+
+/* Actions */
+.o-actions { text-align: center; }
+.o-actions i { color: #9ca3af; cursor: pointer; margin: 0 8px; transition: 0.2s; font-size: 16px; }
+.o-actions i:hover { color: #2563eb; }
+
+/* Pagination */
+.orders-pagination {
+    padding: 16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e7eb;
+}
+.o-page-info { font-size: 14px; color: #6b7280; }
+.o-page-info span { font-weight: 600; color: #111827; }
+.o-page-controls { display: flex; gap: 8px; }
+.o-page-controls button {
+    padding: 8px 14px; border: 1px solid #e5e7eb; background: white; border-radius: 8px;
+    font-size: 14px; font-weight: 500; color: #374151; cursor: pointer; transition: 0.2s;
+}
+.o-page-controls button:hover:not(:disabled) { background: #f3f4f6; }
+.o-page-controls button:disabled { color: #9ca3af; cursor: not-allowed; opacity: 0.6; }

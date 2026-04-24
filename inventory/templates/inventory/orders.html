@@ -1,0 +1,159 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orders Management - Stockify</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/admin_console.css' %}">
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+</head>
+<body>
+
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-header">
+                <img src="{% static 'images/cube-logo.png' %}" alt="Logo" style="filter: none;">
+                <div class="sidebar-brand-text">
+                    Stockify
+                    <span>Admin Console</span>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="{% if request.resolver_match.url_name == 'admin_console' %}active{% endif %}">
+                    <a href="{% url 'admin_console' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'inventory' %}active{% endif %}">
+                    <a href="{% url 'inventory' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-box"></i> Inventory</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
+                    <a href="{% url 'product_list' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-list"></i> Product List</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'stock_movement' %}active{% endif %}">
+                    <a href="{% url 'stock_movement' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-arrow-right-arrow-left"></i> Stock Movement</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'suppliers' %}active{% endif %}">
+                    <a href="{% url 'suppliers' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-truck"></i> Suppliers</a>
+                </li>
+                <li class="active">
+                    <a href="{% url 'orders' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-cart-shopping"></i> Orders</a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+                    <a href="{% url 'analytics' %}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:15px;"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+                </li>
+            </ul>
+        </div>
+        <div class="sidebar-user">
+            <div class="avatar">{{ request.user.username|make_list|first|upper|default:"A" }}</div>
+            <div style="font-size: 14px; font-weight: 600;">{{ request.user.username|default:"Admin" }}</div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="orders-breadcrumb">
+            Inventory <i class="fa-solid fa-chevron-right" style="margin: 0 4px; font-size: 10px;"></i> <span>Orders</span>
+        </div>
+
+        <div class="orders-header">
+            <div>
+                <h1>Orders Management</h1>
+                <p>Track and manage all purchase and sales orders.</p>
+            </div>
+            <div class="orders-actions">
+                <button class="o-btn o-btn-outline">
+                    <i class="fa-solid fa-download"></i> Download CSV
+                </button>
+                <a href="{% url 'create_order' %}" class="o-btn o-btn-primary">
+                    <i class="fa-solid fa-plus"></i> Create New Order
+                </a>
+            </div>
+        </div>
+
+        <div class="orders-filters">
+            <div class="o-search">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" placeholder="Search by Order ID or Client...">
+            </div>
+            <select class="o-select">
+                <option>Type: All</option>
+                <option>Sales</option>
+                <option>Purchase</option>
+            </select>
+            <select class="o-select">
+                <option>Status: All</option>
+                <option>Shipped</option>
+                <option>Processing</option>
+                <option>Delivered</option>
+            </select>
+            <select class="o-select">
+                <option>Date Range: All Time</option>
+            </select>
+        </div>
+
+        <div class="orders-table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ORDER ID</th>
+                        <th>DATE</th>
+                        <th>CUSTOMER/SUPPLIER</th>
+                        <th>TYPE</th>
+                        <th>TOTAL (₹)</th>
+                        <th>PAYMENT</th>
+                        <th>STATUS</th>
+                        <th style="text-align: center;">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td class="o-id">#{{ order.order_id }}</td>
+                        <td>{{ order.date|date:"M d, Y" }}</td>
+                        <td>
+                            <div class="o-customer">
+                                <div class="o-avatar" style="background: #e0f2fe; color: #0284c7;">{{ order.name_initials }}</div>
+                                <span>{{ order.client_name }}</span>
+                            </div>
+                        </td>
+                        <td class="o-type">{{ order.order_type }}</td>
+                        <td class="o-total">₹{{ order.total_amount }}</td>
+                        <td>
+                            <span class="o-pay pay-{{ order.payment_status|lower }}">{{ order.payment_status }}</span>
+                        </td>
+                        <td>
+                            <span class="o-status st-{{ order.status|lower }}">{{ order.status }}</span>
+                        </td>
+                        <td class="o-actions">
+                            <i class="fa-solid fa-eye"></i>
+                            <i class="fa-solid fa-pen"></i>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 60px; color: #6b7280;">
+                            <i class="fa-solid fa-clipboard-list" style="font-size: 32px; color: #cbd5e1; margin-bottom: 12px;"></i><br>
+                            No orders found matching your filters.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="orders-pagination">
+                <div class="o-page-info">
+                    Showing <span>{% if orders %}1{% else %}0{% endif %}</span> to <span>{{ orders|length }}</span> of <span>{{ orders|length }}</span> orders
+                </div>
+                <div class="o-page-controls">
+                    <button disabled>Previous</button>
+                    <button {% if not orders %}disabled{% endif %}>Next</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>
